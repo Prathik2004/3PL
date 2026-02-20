@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('v1')->group(function () {
+    require __DIR__ . '/../app/Modules/Auth/routes.php';
+    require __DIR__ . '/../app/Modules/User/routes.php';
+    require __DIR__ . '/../app/Modules/Shipment/routes.php';
+    require __DIR__ . '/../app/Modules/Exception/routes.php';
+    require __DIR__ . '/../app/Modules/Dashboard/routes.php';
+    require __DIR__ . '/../app/Modules/CsvUpload/routes.php';
 });
