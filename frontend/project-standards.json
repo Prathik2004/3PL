@@ -1,0 +1,14 @@
+{
+  "srcFolders": [
+    "components",
+    "app",
+    "services",
+    "hooks",
+    "utils",
+    "styles",
+    "constants",
+    "types"
+  ],
+  "componentsSubfolders": ["ui", "common"]
+}
+ 
