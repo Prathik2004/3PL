@@ -1,16 +1,51 @@
+"use client"
 import Image from "next/image"
 import BasicButton from "./BasicButton"
+import { ModalProps } from "@/src/types/types"
+import { useEffect } from "react"
+import { motion, useAnimate } from "motion/react"
 
-const BulkUploadModal = () => {
+
+
+const BulkUploadModal = ({onClose}: ModalProps) => {
+  
+  const [scope, animate]=useAnimate();
+  useEffect(()=> {
+    animate(".box", {
+      opacity:1,
+      filter: "blur(0px)",
+      scale: [1.5, 1],
+    }, {
+      duration:0.5,
+      ease: "easeInOut",
+      type: "spring"
+    })
+  }, [])
+
+  const exitAnimation = async()=>{
+    await animate(".box", {
+      opacity:0,
+      filter:"blur(10px)",
+      scale: 0
+    }, {
+      duration:0.5,
+      ease: "easeIn"
+    })
+
+    onClose()
+  }
+
   return (
-    <div 
+    <div ref={scope}
     className="fixed inset-0 flex md:items-center justify-center bg-black/30 backdrop-blur-sm">
         {/* MODAL */}
-      <div
+      <motion.div 
       style={{
-        fontFamily: "Inter"
+        fontFamily: "Inter",
+        opacity: 0,
+        filter:"blur(10px)"
         }} 
-      className="md:w-130 p-8 flex flex-col items-center justify-center bg-white border border-[#E2E8F0] rounded-xl gap-2">
+      className="md:w-130 p-8 flex flex-col items-center justify-center bg-white border border-[#E2E8F0] rounded-xl gap-2 box">
         {/* ICON */}
         <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#F5F9FF]">
         <Image src="/icons/upload.svg" alt="upload" width={20} height={20} />
@@ -49,10 +84,12 @@ const BulkUploadModal = () => {
         </label>
         {/* ACTION BUTTONS */}
         <div className="flex items-center justify-center gap-2">
-            <BasicButton text="Cancel" className="" />
+            <BasicButton onClick={()=>{
+              exitAnimation()
+            }}  text="Cancel" className="" />
             <BasicButton text="Upload and Process" className="bg-black text-white py-4 px-4 rounded-lg cursor-pointer text-sm md:text-base" />
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

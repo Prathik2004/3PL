@@ -15,3 +15,7 @@ export interface ShipmentRowProps{
     alertColor?: "Yellow" | "Red" | "None";
     status: string
 }
+
+export interface ModalProps{
+    onClose: ()=> void
+}
