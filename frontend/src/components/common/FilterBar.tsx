@@ -15,25 +15,8 @@ export interface FilterState {
   exceptions: 'no_update' | 'missing_pod' | 'critical_delay' | 'all';
 }
 
-// --- CONSTANTS ---
-export const STATUS_OPTIONS: DropdownOption<FilterSortStatus>[] = [
-  { label: 'Created', value: 'pending' },
-  { label: 'Dispatched', value: 'active' },
-  { label: 'In Transit', value: 'active' },
-  { label: 'Out for Delivery', value: 'active' },
-  { label: 'Delivered', value: 'completed' },
-  { label: 'Cancelled', value: 'completed' },
-];
-
-
-
-export const EXCEPTION_OPTIONS = [
-  { label: 'No Update (>24h)', value: 'no_update', icon: 'orange' },
-  { label: 'Missing POD', value: 'missing_pod', icon: 'red' },
-  { label: 'Critical Delay', value: 'critical_delay', icon: 'yellow' },
-];
-
 // --- HOOK ---
+import { STATUS_OPTIONS } from '@/src/constants/filters';
 export const useFilters = () => {
   const router = useRouter();
   const pathname = usePathname();
