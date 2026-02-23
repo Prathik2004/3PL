@@ -77,5 +77,4 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
   )
 }
 
-
 export default ShipmentRow
