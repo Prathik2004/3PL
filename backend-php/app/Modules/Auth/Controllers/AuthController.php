@@ -37,4 +37,9 @@ class AuthController extends Controller
     {
         return $this->service->me();
     }
+
+    public function forgot(Request $request): JsonResponse
+    {
+        return $this->service->forgot($request->all());
+    }
 }
