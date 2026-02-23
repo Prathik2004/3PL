@@ -14,4 +14,5 @@ export const EXCEPTION_OPTIONS = [
   { label: 'No Update (>24h)', value: 'no_update', icon: 'orange' },
   { label: 'Missing POD', value: 'missing_pod', icon: 'red' },
   { label: 'Critical Delay', value: 'critical_delay', icon: 'yellow' },
+  { label: 'Not Dispatched', value: 'not_dispatched', icon: 'gray' },
 ];
