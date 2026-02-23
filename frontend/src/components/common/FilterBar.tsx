@@ -57,7 +57,7 @@ export const useFilters = () => {
 };
 
 // --- HELPER COMPONENTS ---
-import { SearchDropdown, DropdownOption } from '@/src/components/ui/dropdowns/SearchDropdown';
+import { SearchDropdown } from '@/src/components/ui/dropdowns/SearchDropdown';
 import { StatusDropdown } from '@/src/components/ui/dropdowns/StatusDropdown';
 import { ExceptionsDropdown } from '@/src/components/ui/dropdowns/ExceptionsDropdown';
 import { useFilterOptions } from '@/src/hooks/useFilterOptions';
