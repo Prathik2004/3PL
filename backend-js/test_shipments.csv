@@ -1,0 +1,11 @@
+shipment_id,client_name,origin,destination,dispatch_date,expected_delivery_date,carrier_name
+SHP-2001,Alpha Industries,Chandigarh,Delhi,2026-02-24T08:00:00Z,2026-02-26T18:00:00Z,BlueDart
+SHP-2002,Beta Corp,Mumbai,Pune,2026-02-25T09:00:00Z,2026-02-27T18:00:00Z,FedEx
+SHP-2003,Gamma LLC,Bangalore,Chennai,2026-02-26T10:00:00Z,2026-02-28T18:00:00Z,Delhivery
+SHP-2004,Delta Inc,Hyderabad,Pune,2026-02-27T11:00:00Z,2026-03-01T18:00:00Z,EcomExpress
+SHP-2005,Epsilon Tech,Noida,Gurgaon,2026-02-28T12:00:00Z,2026-03-02T18:00:00Z,BlueDart
+SHP-2006,Zeta Logistics,Kolkata,Patna,2026-03-01T08:00:00Z,2026-03-04T18:00:00Z,DHL
+SHP-2007,Eta Retail,Ahmedabad,Surat,2026-03-02T09:00:00Z,2026-03-03T18:00:00Z,FedEx
+SHP-2008,Theta Goods,Jaipur,Delhi,2026-03-03T10:00:00Z,2026-03-05T18:00:00Z,Delhivery
+SHP-2009,Iota Supplies,Lucknow,Kanpur,2026-03-04T11:00:00Z,2026-03-05T18:00:00Z,BlueDart
+SHP-2010,Kappa Traders,Indore,Bhopal,2026-03-05T12:00:00Z,2026-03-06T18:00:00Z,EcomExpress
