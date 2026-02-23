@@ -18,8 +18,35 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 connectDB();
-app.use("/api/auth", authRoutes);
 
+app.use((req, res, next) => {
+  // We have three dummy users to test with:
+
+  const mockAdmin = { 
+    id: '60d5ecb8b392d700153ef111', 
+    role: 'Admin' 
+  };
+
+  const mockClientA = { 
+    id: '60d5ecb8b392d700153ef222', 
+    role: 'Viewer' // Normal user role
+  };
+
+  const mockClientB = { 
+    id: '60d5ecb8b392d700153ef333', 
+    role: 'Viewer' 
+  };
+
+  // 🔴 CHANGE THE VARIABLE BELOW TO TEST DIFFERENT USERS
+  (req as any).user = mockAdmin; 
+
+  next();
+});
+
+<<<<<<< Updated upstream
+=======
+// Add this above your app.use('/api/shipments', ...)
+>>>>>>> Stashed changes
 app.get('/', (req: Request, res: Response) => {
   res.send('Walkwel 3PL API is running. Use /api/shipments for data.');
 });
