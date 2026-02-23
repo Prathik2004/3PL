@@ -1,9 +1,6 @@
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
-import { ShipmentRowProps, StatusIconProps } from "@/src/types/types";
-import EditIcon from "@/public/icons/editIcon";
-import DeleteIcon from "@/public/icons/deleteIcon";
-import { Delete } from "lucide-react";
+import { ShipmentRowProps } from "@/src/types/types";
 
 
 const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
@@ -21,7 +18,7 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
         <span className="flex items-center gap-2 font-bold text-[15px] text-slate-700">
           {shipmentId}
           {alertColor === "Yellow" && <Image src="/icons/warning.svg" alt="Warning" width={14} height={14} />}
-          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={6} height={6} />}
+          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={3} height={3} />}
         </span>
         <span className="text-[13px] text-slate-500 font-medium">
           {client}
@@ -70,10 +67,10 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
       {/* ACTIONS */}
       <div className="flex items-center justify-center gap-1">
         <button className="p-2 hover:bg-red-50 rounded-full transition-colors group">
-          <DeleteIcon/>
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18}/>
         </button>
         <button className="p-2 hover:bg-blue-50 rounded-full transition-colors group">
-          <EditIcon />
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40}/>
         </button>
       </div>
     </div>

@@ -1,5 +1,9 @@
+import { Suspense } from "react";
 import KpiCard from "@/src/components/common/KPICard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
+import NewShipmentButton from "@/src/components/ui/NewShipmentButton";
+import { FilterBar } from "@/src/components/common/FilterBar";
+import ExportButton from "@/src/components/ui/ExportButton";
 
 export default function Dashboard() {
   return (
@@ -43,15 +47,23 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="space-y-8">
-        {/* Heading Section */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
+
+      <div className="space-y-6">
+        {/* Filter and Action Buttons Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded bg-slate-100" />}>
+            <FilterBar />
+          </Suspense>
+          <div className="flex items-center gap-3">
+            <ExportButton />
+            <NewShipmentButton />
+          </div>
         </div>
 
-        {/* Stats Grid Placeholder */}
-        <ShipmentTable />
-        {/* Main Content Area Placeholder */}
+        {/* Shipment Table */}
+        <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-2xl bg-slate-100" />}>
+          <ShipmentTable />
+        </Suspense>
       </div>
     </div>
   );
