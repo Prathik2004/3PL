@@ -88,46 +88,46 @@ export const FilterBar = () => {
 
   return (
     <div className="flex w-max items-center gap-4 rounded-xl bg-slate-50/80 px-4 py-2.5 shadow-sm dark:bg-zinc-900/80 border border-transparent dark:border-zinc-800">
-      
+
       {/* Filter Icon & Label */}
       <div className="flex items-center gap-2 pr-4 border-r border-slate-200 dark:border-zinc-700">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700 dark:text-slate-300">
-          <path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/>
+          <path d="M4 6h16" /><path d="M7 12h10" /><path d="M10 18h4" />
         </svg>
         <span className="text-[15px] font-bold text-slate-900 dark:text-slate-100 tracking-wide">Filter</span>
       </div>
 
       {/* Dropdowns */}
       <div className="flex items-center gap-5">
-        <SearchDropdown 
+        <SearchDropdown
           label="Client"
           options={clientOptions}
           value={filters.client}
           onChange={(value) => updateFilter('client', value)}
           disabled={isPending || isLoading}
         />
-        <SearchDropdown 
+        <SearchDropdown
           label="Carrier"
           options={carrierOptions}
           value={filters.carrier}
           onChange={(value) => updateFilter('carrier', value)}
           disabled={isPending || isLoading}
         />
-        <StatusDropdown 
+        <StatusDropdown
           label="Status"
           options={STATUS_OPTIONS}
           value={filters.status}
           onChange={(value) => updateFilter('status', value)}
           disabled={isPending}
         />
-        <ExceptionsDropdown 
+        <ExceptionsDropdown
           value={filters.exceptions}
           onChange={(value) => updateFilter('exceptions', value)}
           disabled={isPending}
         />
-        
+
         {hasActiveFilters && (
-          <button 
+          <button
             onClick={clearFilters}
             className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors ml-2 font-medium"
           >
