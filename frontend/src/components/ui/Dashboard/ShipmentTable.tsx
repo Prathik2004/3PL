@@ -1,5 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow"
+import Pagination from "../Pagination";
 
 export const shipments: ShipmentRowProps[] = [
   {
@@ -60,6 +64,14 @@ export const shipments: ShipmentRowProps[] = [
 ];
 
 const ShipmentTable = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 48; // As seen in the design
+  const itemsPerPage = 5;
+  const totalItems = 1240;
+
+  const startIdx = (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
+
   return (
     <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">
       {/* Scrollable Container */}
@@ -100,14 +112,16 @@ const ShipmentTable = () => {
       <div className="flex items-center justify-between px-8 py-4 text-[#64748B] text-[12px] bg-white border-t border-[#E2E8F0] w-full">
         <div className="flex items-center gap-1">
           <span>SHOWING</span>
-          <span className="text-slate-900 font-semibold px-1">1-5</span>
+          <span className="text-slate-900 font-semibold px-1">{startIdx}-{endIdx}</span>
           <span>OF</span>
-          <span className="text-slate-900 font-semibold px-1">1240</span>
+          <span className="text-slate-900 font-semibold px-1">{totalItems}</span>
           <span>SHIPMENTS</span>
         </div>
-        <div className="font-medium hover:text-blue-600 cursor-pointer transition-colors">
-          PAGINATION CONTROLS
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   )
@@ -115,3 +129,4 @@ const ShipmentTable = () => {
 
 
 export default ShipmentTable
+
