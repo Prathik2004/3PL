@@ -1,7 +1,7 @@
 
 interface BasicInputProps{
-  text: string;
-  placeholder: string;
+  text?: string;
+  placeholder?: string;
 }
 
 const BasicInput = ({text, placeholder}: BasicInputProps) => {
