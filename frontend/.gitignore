@@ -40,3 +40,4 @@ next-env.d.ts
 /backend-php/
 /backend-python/src/app/test-lab/
 src/app/test-lab/
+/package-lock.*

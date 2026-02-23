@@ -19,10 +19,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-white antialiased`}>
-        {/* This is now a clean entry point. 
-          The flex-layout logic can be handled inside specific (page).tsx 
-          or a group layout to keep this file lean.
-        */}
         {children}
       </body>
     </html>
