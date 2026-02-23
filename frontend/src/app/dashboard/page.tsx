@@ -1,5 +1,8 @@
 import KpiCard from "@/src/components/common/KPICard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
+import { FilterBar } from "@/src/components/common/FilterBar";
+import ExportButton from "@/src/components/ui/ExportButton";
+import NewShipmentButton from "@/src/components/ui/NewShipmentButton";
 
 export default function Dashboard() {
   return (
@@ -43,15 +46,18 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="space-y-8">
-        {/* Heading Section */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
+      <div className="space-y-6">
+        {/* Filter and Action Buttons Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <FilterBar />
+          <div className="flex items-center gap-3">
+            <ExportButton />
+            <NewShipmentButton />
+          </div>
         </div>
 
-        {/* Stats Grid Placeholder */}
+        {/* Shipment Table */}
         <ShipmentTable />
-        {/* Main Content Area Placeholder */}
       </div>
     </div>
   );
