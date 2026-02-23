@@ -5,7 +5,7 @@ import express, { Request, Response, NextFunction } from "express";
 import shipmentRoutes from "./modules/shipment/route"; // Ensure 'Shipment'
 // matches folder name exactly
 import exceptionRoutes from "./modules/Expections/exceptionRoutes";
-
+import { authenticate } from "./middleware/authenticate";
 import connectDB from "./config/database";
 import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
@@ -58,7 +58,7 @@ app.get("/health", (req: Request, res: Response) => {
 
 // Mount the Shipment Module Routes
 // This maps to endpoints like POST /api/shipments and GET /api/shipments
-app.use("/api/shipments", shipmentRoutes);
+app.use("/api/shipments", authenticate, shipmentRoutes);
 app.use("/api/exceptions", exceptionRoutes);
 
 // Global Error Handler Middleware
