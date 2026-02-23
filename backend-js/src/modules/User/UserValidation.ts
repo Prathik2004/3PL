@@ -16,5 +16,5 @@ export const validateUpdateUser = (req: Request, res: Response, next: NextFuncti
             details: error.details.map(d => d.message)
         });
     }
-    next();
+    return next();
 };

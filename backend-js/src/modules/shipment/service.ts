@@ -7,7 +7,7 @@ import { createShipmentSchema } from './validator';
 export class ShipmentService {
 
     static async processCsvUpload(filePath: string, userId: string): Promise<any> {
-        const results: any[] = [];
+        const results: { row: number, data: any }[] = [];
         const errors: any[] = [];
         let rowNumber = 1; 
 
@@ -19,7 +19,7 @@ export class ShipmentService {
                     results.push({ row: rowNumber, data });
                 })
                 .on('end', async () => {
-                    const successfulInserts = [];
+                    const successfulInserts: string[] = []; // Explicitly type as string array
 
                     for (const item of results) {
                         try {
@@ -32,7 +32,7 @@ export class ShipmentService {
 
                             const newShipment = await Shipment.create({
                                 ...validData,
-                                user_id: userId, 
+                                created_by: userId, // Changed from user_id to created_by
                                 status: ShipmentStatus.CREATED,
                                 pod_received: false,
                                 last_status_update: new Date(),
@@ -48,7 +48,7 @@ export class ShipmentService {
                         }
                     }
 
-                    fs.unlinkSync(filePath);
+                    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
                     resolve({
                         total_processed: rowNumber - 1,
@@ -71,7 +71,7 @@ export class ShipmentService {
 
         return await Shipment.create({
             ...data,
-            user_id: userId,
+            created_by: userId, // Changed from user_id to created_by
             status: ShipmentStatus.CREATED,
             last_status_update: new Date()
         });
@@ -82,9 +82,9 @@ export class ShipmentService {
         
         const query: any = { status: { $ne: ShipmentStatus.CANCELLED } };
 
-        // If not Admin/Operations, strictly filter by user_id
+        // Admin/Operations see everything, others only see what they created
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.user_id = userId;
+            query.created_by = userId; // Changed from user_id to created_by
         }
 
         if (filters.status) query.status = filters.status;
@@ -101,9 +101,8 @@ export class ShipmentService {
     static async updateStatus(id: string, updateData: any, userId: string, userRole: string) {
         const query: any = { id };
         
-        // If not Admin/Operations, ensure they only update their own shipment
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.user_id = userId;
+            query.created_by = userId; // Changed from user_id to created_by
         }
 
         const shipment = await Shipment.findOne(query);
@@ -125,9 +124,8 @@ export class ShipmentService {
     static async cancelShipment(id: string, userId: string, userRole: string) {
         const query: any = { id };
         
-        // If not Admin/Operations, ensure they only cancel their own shipment
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.user_id = userId;
+            query.created_by = userId; // Changed from user_id to created_by
         }
 
         const shipment = await Shipment.findOneAndUpdate(
