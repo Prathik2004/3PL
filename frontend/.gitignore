@@ -31,3 +31,5 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+src/app/test-lab/
+src/app/test-lab/
