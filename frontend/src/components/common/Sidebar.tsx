@@ -14,13 +14,15 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex w-[280px] shrink-0 h-screen bg-white flex-col gap-[4px] px-[16px] border-r border-slate-100 sticky top-0">
-      {/* Logo Section */}
-      <div className="w-full h-[88px] flex items-center px-[24px]">
-        <Image src="/icons/logo.svg" alt="Walkwel Logo" width={160} height={40} priority className="w-auto h-8" />
+    /* Width 255px as per Figma */
+    <aside className="w-[255px] h-screen bg-white flex flex-col gap-[4px] px-[16px] border-r border-slate-100">
+      
+      {/* Logo Section - Height 88px */}
+      <div className="w-full h-[88px] py-[24px] px-[32px] flex items-center gap-[12px]">
+        <Image src="/icons/logo.svg" alt="Walkwel Logo" width={160} height={40} priority />
       </div>
 
-      {/* Navigation Items */}
+      {/* Navigation Items - Gap 4px */}
       <nav className="flex flex-col gap-[4px]">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
@@ -29,10 +31,11 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-[12px] w-[223px] h-[44px] px-[12px] py-[10px] rounded-[8px] transition-colors
-                ${isActive
-                  ? 'bg-side-hover text-side-active-text font-medium'
-                  : 'text-side-text hover:bg-side-hover hover:text-side-active-text'}
+                flex items-center gap-[12px] w-[223px] h-[44px] px-[12px] py-[10px] rounded-[8px] transition-all duration-200
+                ${isActive 
+                  ? 'bg-[#E2E8F0] text-[#0F172A] font-medium' // Active state
+                  : 'bg-white text-[#64748B] hover:bg-[#F5F9FF] hover:text-[#0F172A]' // Inactive & Hover
+                }
               `}
             >
               <Image
@@ -42,7 +45,7 @@ export default function Sidebar() {
                 height={20}
                 className={isActive ? 'brightness-0' : 'opacity-70'}
               />
-              <span className="text-[14px]">{item.label}</span>
+              <span className="text-[14px] leading-tight">{item.label}</span>
             </Link>
           );
         })}
