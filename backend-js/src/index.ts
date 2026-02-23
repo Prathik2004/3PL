@@ -5,6 +5,11 @@ import userRoutes from './modules/User/UserRoutes';
 import dotenv from 'dotenv';
 dotenv.config();
 
+import express, { Request, Response, NextFunction } from 'express';
+import shipmentRoutes from './modules/shipment/route';
+import authRoutes from "./modules/auth/route";
+import connectDB from './config/database';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -13,17 +18,34 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 connectDB();
+app.use("/api/auth", authRoutes);
 
-// Add this above your app.use('/api/shipments', ...)
 app.get('/', (req: Request, res: Response) => {
   res.send('Walkwel 3PL API is running. Use /api/shipments for data.');
 });
 
+// Handle password reset link click
+app.get('/reset-password/:token', (req: Request, res: Response) => {
+  const { token } = req.params;
+  // For now, redirect to the frontend port 3000 if it's separate, 
+  // or just explain that this is the API.
+  // The user said "when i am opening it is opening on localhost 3000"
+  res.send(`
+    <h3>Reset Password</h3>
+    <p>Token: ${token}</p>
+    <p>Please use the frontend application to complete the password reset.</p>
+    <script>
+      // If there is a frontend on 3000, we could redirect there
+      // window.location.href = "http://localhost:3000/reset-password/" + "${token}";
+    </script>
+  `);
+});
+
 // Basic Health Check Route
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ 
-    status: 'UP', 
-    message: 'Walkwel 3PL Control Lite API is running' 
+  res.status(200).json({
+    status: 'UP',
+    message: 'Walkwel 3PL Control Lite API is running'
   });
 });
 
