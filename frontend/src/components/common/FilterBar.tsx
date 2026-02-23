@@ -5,15 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 
 // --- TYPES ---
-export type FilterSortStatus = 'active' | 'pending' | 'completed' | 'all';
-export type FilterCarrier = 'fedex' | 'ups' | 'usps' | 'dhl' | 'all';
-
-export interface FilterState {
-  client: string;
-  carrier: FilterCarrier;
-  status: FilterSortStatus;
-  exceptions: 'no_update' | 'missing_pod' | 'critical_delay' | 'all';
-}
+import { FilterState, FilterSortStatus, FilterCarrier } from '@/src/types/filter.types';
 
 // --- HOOK ---
 import { STATUS_OPTIONS } from '@/src/constants/filters';
