@@ -1,11 +1,9 @@
 import KpiCard from "@/src/components/common/KPICard";
-
-const Index = () => {
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 
 export default function Dashboard() {
   return (
-    <div className="w-full bg-[#FFFFFF] p-6 lg:p-10">
+    <div className="w-full bg-[#FFFFFF] p-6 lg:p-10 space-y-8">
       {/* KPI Row: Forced into one line on desktop */}
       <div className="flex flex-nowrap lg:flex-row gap-4 overflow-x-auto pb-4 lg:pb-0">
         <KpiCard
@@ -43,18 +41,18 @@ export default function Dashboard() {
           status="success"
           iconSrc="/icons/ontime.svg"
         />
-    <div className="space-y-8">
-      {/* Heading Section */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
       </div>
 
-      {/* Stats Grid Placeholder */}
-      <ShipmentTable />
-      {/* Main Content Area Placeholder */}
+      <div className="space-y-8">
+        {/* Heading Section */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
+        </div>
 
+        {/* Stats Grid Placeholder */}
+        <ShipmentTable />
+        {/* Main Content Area Placeholder */}
+      </div>
     </div>
   );
-};
-
-export default Index;
+}
