@@ -1,0 +1,6 @@
+shipment_id,client_name,origin,destination,dispatch_date,expected_delivery_date,carrier_name
+SHP-1001,ABC Corp,Delhi,Mumbai,2026-02-25T10:00:00Z,2026-02-28T18:00:00Z,FedEx
+SHP-1002,XYZ Inc,Chennai,Bangalore,2026-02-26T10:00:00Z,2026-02-27T18:00:00Z,Delhivery
+SHP-1001,Bad Corp,Delhi,Pune,2026-02-27T10:00:00Z,2026-03-01T18:00:00Z,BlueDart
+SHP-1003,Error Inc,Kolkata,Goa,2026-03-05T10:00:00Z,2026-03-01T10:00:00Z,DHL
+SHP-1004,,Noida,Gurgaon,2026-02-25T10:00:00Z,2026-02-28T18:00:00Z,EcomExpress
