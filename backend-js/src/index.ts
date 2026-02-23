@@ -5,10 +5,8 @@ import userRoutes from './modules/User/UserRoutes';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express, { Request, Response, NextFunction } from 'express';
-import shipmentRoutes from './modules/shipment/route';
+
 import authRoutes from "./modules/auth/route";
-import connectDB from './config/database';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,10 +41,6 @@ app.use((req, res, next) => {
   next();
 });
 
-<<<<<<< Updated upstream
-=======
-// Add this above your app.use('/api/shipments', ...)
->>>>>>> Stashed changes
 app.get('/', (req: Request, res: Response) => {
   res.send('Walkwel 3PL API is running. Use /api/shipments for data.');
 });
