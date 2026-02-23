@@ -2,7 +2,18 @@ import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
 
-const NewShipmentModal = () => {
+interface EditShipmentModalProps{
+    shipmentId?: string;
+    client?: string;
+    carrier?: string;
+    status?: string;
+    origin?: string;
+    dest?: string;
+    dispatchDate?: Date;
+    expDelivery?: Date;
+}
+
+const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery}: EditShipmentModalProps) => {
   return (
     <div
     style={{
@@ -13,8 +24,8 @@ const NewShipmentModal = () => {
       {/* HEADER */}
       <div className="bg-[#E2E8F0] py-5 px-8 rounded-t-xl flex items-center justify-between">
       <div className="w-[70%]  flex flex-col ">
-        <span className="text-[22px]/[28px] font-bold">Create New Shipment</span>
-        <span className="text-[12px] text-[#64748B]">Initialize a new logistics entry for the 3PL system.</span>
+        <span className="text-[22px]/[28px] font-bold">Edit Shipment {shipmentId} </span>
+        <span className="text-[12px] text-[#64748B]">Update logistics details and status history.</span>
       </div>
       <button className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
         <Image src="icons/cross.svg" alt="close" width={10} height={10} />
@@ -28,10 +39,10 @@ const NewShipmentModal = () => {
           <Image src="/icons/logictics.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
-        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" />
-        <BasicInput text="Client Selection" placeholder="#Select Client" />
-        <BasicInput text="Carrier Name" placeholder="Select approved carrier" />
-        <BasicInput text="Current Status" placeholder="Created" />
+        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" value={shipmentId} />
+        <BasicInput text="Client Selection" placeholder="#Select Client" value={client} />
+        <BasicInput text="Carrier Name" placeholder="Select approved carrier" value={carrier} />
+        <BasicInput text="Current Status" placeholder="Created" value={status} />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
       <div className="flex flex-col gap-5">
@@ -39,10 +50,10 @@ const NewShipmentModal = () => {
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicInput text="Origin address" placeholder="Enter Origin Address" />
-        <BasicInput text="Destination address" placeholder="Enter Destination Address" />
-        <BasicInput text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" />
-        <BasicInput text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" />
+        <BasicInput text="Origin address" placeholder="Enter Origin Address" value={origin} />
+        <BasicInput text="Destination address" placeholder="Enter Destination Address" value={dest} />
+        <BasicInput text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" value={dispatchDate?.toString()} />
+        <BasicInput text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" value={expDelivery?.toString()} />
       </div>
     </div>
     {/* MODAL FOOTER */}
@@ -63,4 +74,4 @@ const NewShipmentModal = () => {
   )
 }
 
-export default NewShipmentModal
+export default EditShipmentModal
