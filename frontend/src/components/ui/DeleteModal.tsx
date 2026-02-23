@@ -21,8 +21,8 @@ const DeleteModal = () => {
             Are you sure you want to delete this shipment? This action cannot be undone.
         </span>
         <div className='flex items-center justify-evenly gap-3'>
-            <BasicButton text="Cancel" className='border border-[#E2E8F0]' />
-            <BasicButton text="Delete" className='bg-red-500 text-white' />
+            <BasicButton text="Cancel" className='border border-[#E2E8F0] py-3 px-12 rounded-lg' />
+            <BasicButton text="Delete" className='bg-red-500 text-white py-3 px-12 rounded-lg' />
         </div>
     </div>
     </div>

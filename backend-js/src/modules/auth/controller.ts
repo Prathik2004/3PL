@@ -49,7 +49,12 @@ export const login = async (req: Request, res: Response) => {
 };
 export const logout = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findOne({ userId: req.user?.id });
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: "User ID not found" });
+      return;
+    }
+    const user = await User.findOne({ _id: userId });
     if (user) {
       user.refreshToken = undefined;
       await user.save();

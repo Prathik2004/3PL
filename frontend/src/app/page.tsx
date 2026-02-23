@@ -1,20 +1,11 @@
-<<<<<<< HEAD
-import ExportButton from "../components/ui/ExportButton";
-import NewShipmentButton from "../components/ui/NewShipmentButton";
-
-export default function Home() {
-  return (
-    <h1 className="text-2xl font-semibold text-[#0F172A] p-10 space-y-5">
-        
-=======
 import BasicInput from "../components/ui/BasicInput";
+import DeleteModal from "../components/ui/DeleteModal";
 
 export default function Home() {
   return (
-    <h1 className="text-2xl font-semibold text-[#0F172A] p-10 space-y-5 ">
+    <h1 className="text-2xl font-semibold text-[#0F172A] p-10 space-y-5 min-h-screen">
 
-      <BasicInput />
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
+      <BasicInput text="SHIPMENT ID" />
     </h1>
   );
 }
