@@ -1,3 +1,5 @@
 .env
 backend-js
 backend-python
+frontend
+node_modules
