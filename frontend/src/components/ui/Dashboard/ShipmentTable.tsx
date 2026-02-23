@@ -120,12 +120,15 @@ export const shipments: ShipmentRowProps[] = [
 
 const ShipmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 48; // As seen in the design
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const totalItems = 1240;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const startIdx = (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // For demonstration, we'll repeat the shipments array to simulate 10 items
+  const displayShipments = [...shipments, ...shipments].slice(0, itemsPerPage);
 
   return (
     <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">
@@ -145,7 +148,7 @@ const ShipmentTable = () => {
 
           {/* TABLE CONTENT */}
           <div className="w-full flex flex-col">
-            {shipments?.map((shipment, idx) => (
+            {displayShipments?.map((shipment, idx) => (
               <ShipmentRow
                 key={idx}
                 shipmentId={shipment.shipmentId}
