@@ -1,9 +1,6 @@
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
-import { ShipmentRowProps, StatusIconProps } from "@/src/types/types";
-import EditIcon from "@/public/icons/editIcon";
-import DeleteIcon from "@/public/icons/deleteIcon";
-import { Delete } from "lucide-react";
+import { ShipmentRowProps } from "@/src/types/types";
 
 
 const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
@@ -70,10 +67,10 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
       {/* ACTIONS */}
       <div className="flex items-center justify-center gap-1">
         <button className="p-2 hover:bg-red-50 rounded-full transition-colors group">
-          <DeleteIcon/>
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18}/>
         </button>
         <button className="p-2 hover:bg-blue-50 rounded-full transition-colors group">
-          <EditIcon />
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40}/>
         </button>
       </div>
     </div>
