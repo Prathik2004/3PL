@@ -1,6 +1,6 @@
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
-import { ShipmentRowProps, StatusIconProps } from "@/src/types/types";
+import { ShipmentRowProps } from "@/src/types/types";
 
 
 const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
@@ -18,7 +18,7 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
         <span className="flex items-center gap-2 font-bold text-[15px] text-slate-700">
           {shipmentId}
           {alertColor === "Yellow" && <Image src="/icons/warning.svg" alt="Warning" width={14} height={14} />}
-          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={6} height={14} />}
+          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={6} height={6} />}
         </span>
         <span className="text-[13px] text-slate-500 font-medium">
           {client}
@@ -67,10 +67,10 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
       {/* ACTIONS */}
       <div className="flex items-center justify-center gap-1">
         <button className="p-2 hover:bg-red-50 rounded-full transition-colors group">
-          <Image src="/icons/delete.svg" alt="Delete" width={20} height={20} className="opacity-60 group-hover:opacity-100" />
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18}/>
         </button>
         <button className="p-2 hover:bg-blue-50 rounded-full transition-colors group">
-          <Image src="/icons/edit.svg" alt="Edit" width={20} height={20} className="opacity-60 group-hover:opacity-100" />
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40}/>
         </button>
       </div>
     </div>
