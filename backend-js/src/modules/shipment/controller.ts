@@ -30,6 +30,9 @@ export class ShipmentController {
     try {
       const validData = updateStatusSchema.parse(req.body);
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id) {
+        return res.status(400).json({ error: "Shipment ID is required" });
+      }
       const result = await ShipmentService.updateStatus(id, validData);
       return res.status(200).json(result);
     } catch (error: any) {
@@ -40,6 +43,9 @@ export class ShipmentController {
   static async delete(req: Request, res: Response) {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id) {
+        return res.status(400).json({ error: "Shipment ID is required" });
+      }
       const result = await ShipmentService.cancelShipment(id);
       return res.status(200).json(result);
     } catch (error: any) {
