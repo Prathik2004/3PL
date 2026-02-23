@@ -11,6 +11,6 @@ export const authorizeRoles = (...allowedRoles: UserRole[]) => {
         error: 'Forbidden: You do not have permission to perform this action' 
       });
     }
-    next();
+    return next();
   };
 };
