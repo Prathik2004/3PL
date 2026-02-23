@@ -1,9 +1,5 @@
-import ShipmentTable from "../components/ui/Dashboard/ShipmentTable";
-
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      
-    </div>
+    <h1 className="text-2xl font-semibold text-[#0F172A]">HOMEPAGE</h1>
   );
 }
