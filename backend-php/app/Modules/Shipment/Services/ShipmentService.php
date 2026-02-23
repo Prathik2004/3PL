@@ -11,6 +11,7 @@ use App\Constants\ShipmentStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ShipmentService
 {
@@ -42,7 +43,6 @@ class ShipmentService
             'created_by'             => $userId,
         ]);
 
-        // Log status
         $this->logStatus($shipment->shipment_id, null, ShipmentStatus::CREATED, $userId);
 
         return ResponseHelper::created('Shipment created successfully', [
@@ -55,11 +55,18 @@ class ShipmentService
 
     public function getAll(Request $request): JsonResponse
     {
-        $filters  = $request->only([
+        $user    = auth('api')->user();
+        $filters = $request->only([
             'status', 'client_name', 'carrier_name',
             'date_from', 'date_to', 'search', 'include_cancelled',
         ]);
-        $perPage  = (int) $request->get('per_page', 20);
+
+        // Viewer — only see shipments they created
+        if ($user->role === 'Viewer') {
+            $filters['created_by'] = $user->id;
+        }
+
+        $perPage   = (int) $request->get('per_page', 20);
         $paginator = $this->repository->getAll($filters, $perPage);
 
         return ResponseHelper::paginated(
@@ -71,10 +78,18 @@ class ShipmentService
 
     public function getById(string $id): JsonResponse
     {
+        $user     = auth('api')->user();
         $shipment = $this->repository->findById($id);
 
         if (!$shipment) {
             return ResponseHelper::notFound('Shipment not found');
+        }
+
+        // Viewer can only see shipments they created
+        if ($user->role === 'Viewer' && $shipment->created_by !== $user->id) {
+            return ResponseHelper::forbidden(
+                'You do not have access to this shipment.'
+            );
         }
 
         $logs = DB::table('shipment_logs')
@@ -86,58 +101,57 @@ class ShipmentService
             ->where('shipment_id', $shipment->shipment_id)
             ->get();
 
-        $data              = $shipment->toArray();
+        $data                   = $shipment->toArray();
         $data['status_history'] = $logs;
         $data['exceptions']     = $exceptions;
 
         return ResponseHelper::success('Shipment retrieved', $data);
     }
 
-   public function updateStatus(string $id, array $data, string $userId): JsonResponse
-{
-    $shipment = $this->repository->findById($id);
+    public function updateStatus(string $id, array $data, string $userId): JsonResponse
+    {
+        $shipment = $this->repository->findById($id);
 
-    if (!$shipment) {
-        return ResponseHelper::notFound('Shipment not found');
+        if (!$shipment) {
+            return ResponseHelper::notFound('Shipment not found');
+        }
+
+        $validator = UpdateStatusValidator::validate($data, $shipment->dispatch_date);
+
+        if ($validator->fails()) {
+            return ResponseHelper::validationError(
+                $validator->errors()->toArray()
+            );
+        }
+
+        $oldStatus = $shipment->status;
+        $newStatus = $data['status'];
+
+        $updateData = [
+            'status'             => $newStatus,
+            'last_status_update' => DateHelper::nowUtc(),
+        ];
+
+        if ($newStatus === ShipmentStatus::DELIVERED) {
+            $updateData['delivered_date'] = $data['delivered_date'];
+            $updateData['pod_received']   = $data['pod_received'] ?? false;
+        }
+
+        if ($newStatus === ShipmentStatus::CANCELLED) {
+            $shipment->update($updateData);
+            $shipment->delete();
+        } else {
+            $this->repository->update($shipment, $updateData);
+        }
+
+        $this->logStatus($shipment->shipment_id, $oldStatus, $newStatus, $userId);
+
+        return ResponseHelper::success('Status updated successfully', [
+            'id'             => $shipment->id,
+            'status'         => $newStatus,
+            'delivered_date' => $data['delivered_date'] ?? null,
+        ]);
     }
-
-    // Pass dispatch_date to validator
-    $validator = UpdateStatusValidator::validate($data, $shipment->dispatch_date);
-
-    if ($validator->fails()) {
-        return ResponseHelper::validationError(
-            $validator->errors()->toArray()
-        );
-    }
-
-    $oldStatus  = $shipment->status;
-    $newStatus  = $data['status'];
-
-    $updateData = [
-        'status'             => $newStatus,
-        'last_status_update' => DateHelper::nowUtc(),
-    ];
-
-    if ($newStatus === ShipmentStatus::DELIVERED) {
-        $updateData['delivered_date'] = $data['delivered_date'];
-        $updateData['pod_received']   = $data['pod_received'] ?? false;
-    }
-
-    if ($newStatus === ShipmentStatus::CANCELLED) {
-        $shipment->update($updateData);
-        $shipment->delete();
-    } else {
-        $this->repository->update($shipment, $updateData);
-    }
-
-    $this->logStatus($shipment->shipment_id, $oldStatus, $newStatus, $userId);
-
-    return ResponseHelper::success('Status updated successfully', [
-        'id'             => $shipment->id,
-        'status'         => $newStatus,
-        'delivered_date' => $data['delivered_date'] ?? null,
-    ]);
-}
 
     public function update(string $id, array $data): JsonResponse
     {
@@ -179,7 +193,7 @@ class ShipmentService
         string $userId
     ): void {
         DB::table('shipment_logs')->insert([
-            'id'          => \Illuminate\Support\Str::uuid(),
+            'id'          => (string) Str::uuid(),
             'shipment_id' => $shipmentId,
             'old_status'  => $oldStatus,
             'new_status'  => $newStatus,
