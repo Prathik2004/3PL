@@ -1,16 +1,15 @@
 import fs from 'fs';
 import csv from 'csv-parser';
 import { Shipment } from '../../models/shipment';
-import { ShipmentStatus } from '../../types';
+import { ShipmentStatus, UserRole } from '../../types';
 import { createShipmentSchema } from './validator';
 
 export class ShipmentService {
 
-
-    static async processCsvUpload(filePath: string): Promise<any> {
-        const results: any[] = [];
+    static async processCsvUpload(filePath: string, userId: string): Promise<any> {
+        const results: { row: number, data: any }[] = [];
         const errors: any[] = [];
-        let rowNumber = 1; // Header is row 1, data starts at row 2
+        let rowNumber = 1; 
 
         return new Promise((resolve, reject) => {
             fs.createReadStream(filePath)
@@ -20,22 +19,20 @@ export class ShipmentService {
                     results.push({ row: rowNumber, data });
                 })
                 .on('end', async () => {
-                    const successfulInserts = [];
+                    const successfulInserts: string[] = []; // Explicitly type as string array
 
                     for (const item of results) {
                         try {
-                            // 1. Zod Validation (handles data types and Dispatch < Expected logic)
                             const validData = createShipmentSchema.parse(item.data);
 
-                            // 2. Duplicate ID Check [cite: 46]
                             const existing = await Shipment.findOne({ shipment_id: validData.shipment_id });
                             if (existing) {
                                 throw new Error("Duplicate shipment_id");
                             }
 
-                            // 3. Database Insertion
                             const newShipment = await Shipment.create({
                                 ...validData,
+                                created_by: userId, // Changed from user_id to created_by
                                 status: ShipmentStatus.CREATED,
                                 pod_received: false,
                                 last_status_update: new Date(),
@@ -43,7 +40,6 @@ export class ShipmentService {
 
                             successfulInserts.push(newShipment.shipment_id);
                         } catch (error: any) {
-                            // Collect row-level errors [cite: 47]
                             errors.push({
                                 row: item.row,
                                 shipment_id: item.data.shipment_id || 'Unknown',
@@ -52,10 +48,8 @@ export class ShipmentService {
                         }
                     }
 
-                    // Clean up the uploaded file from the server
-                    fs.unlinkSync(filePath);
+                    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
-                    // Resolve with the error report and success metrics
                     resolve({
                         total_processed: rowNumber - 1,
                         successful_count: successfulInserts.length,
@@ -65,28 +59,33 @@ export class ShipmentService {
                     });
                 })
                 .on('error', (error) => {
-                    // Clean up file on stream error
                     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
                     reject(error);
                 });
         });
     }
 
-    static async createShipment(data: any) {
-        // Now 'Shipment' is a value/model, so .findOne() will work
+    static async createShipment(data: any, userId: string) {
         const existing = await Shipment.findOne({ shipment_id: data.shipment_id });
         if (existing) throw new Error("Duplicate shipment_id");
 
         return await Shipment.create({
             ...data,
+            created_by: userId, // Changed from user_id to created_by
             status: ShipmentStatus.CREATED,
             last_status_update: new Date()
         });
     }
 
-    static async getShipments(filters: any, page: number, limit: number) {
+    static async getShipments(filters: any, page: number, limit: number, userId: string, userRole: string) {
         const skip = (page - 1) * limit;
+        
         const query: any = { status: { $ne: ShipmentStatus.CANCELLED } };
+
+        // Admin/Operations see everything, others only see what they created
+        if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
+            query.created_by = userId; // Changed from user_id to created_by
+        }
 
         if (filters.status) query.status = filters.status;
         if (filters.client) query.client_name = { $regex: filters.client, $options: 'i' };
@@ -99,11 +98,16 @@ export class ShipmentService {
         return { total, page, limit, data };
     }
 
-    static async updateStatus(id: string, updateData: any) {
-        const shipment = await Shipment.findOne({ id });
-        if (!shipment) throw new Error("Shipment not found");
+    static async updateStatus(id: string, updateData: any, userId: string, userRole: string) {
+        const query: any = { id };
+        
+        if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
+            query.created_by = userId; // Changed from user_id to created_by
+        }
 
-        // SRS Logic: Delivered Date cannot be before Dispatch Date
+        const shipment = await Shipment.findOne(query);
+        if (!shipment) throw new Error("Shipment not found or unauthorized");
+
         if (updateData.status === ShipmentStatus.DELIVERED && updateData.delivered_date) {
             if (new Date(updateData.delivered_date) < new Date(shipment.dispatch_date)) {
                 throw new Error("Delivered Date cannot be before Dispatch Date");
@@ -111,17 +115,26 @@ export class ShipmentService {
         }
 
         return await Shipment.findOneAndUpdate(
-            { id },
+            query, 
             { ...updateData, last_status_update: new Date() },
             { new: true }
         );
     }
 
-    static async cancelShipment(id: string) {
-        return await Shipment.findOneAndUpdate(
-            { id },
+    static async cancelShipment(id: string, userId: string, userRole: string) {
+        const query: any = { id };
+        
+        if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
+            query.created_by = userId; // Changed from user_id to created_by
+        }
+
+        const shipment = await Shipment.findOneAndUpdate(
+            query,
             { status: ShipmentStatus.CANCELLED, last_status_update: new Date() },
             { new: true }
         );
+        
+        if (!shipment) throw new Error("Shipment not found or unauthorized");
+        return shipment;
     }
 }

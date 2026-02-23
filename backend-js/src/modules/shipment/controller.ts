@@ -6,8 +6,10 @@ export class ShipmentController {
   
   static async create(req: Request, res: Response) {
     try {
+      const userId = (req as any).user?.id; 
       const validData = createShipmentSchema.parse(req.body);
-      const result = await ShipmentService.createShipment(validData);
+      
+      const result = await ShipmentService.createShipment(validData, userId);
       return res.status(201).json({ message: "Shipment created successfully", id: result.id });
     } catch (error: any) {
       if (error.message === "Duplicate shipment_id") return res.status(400).json({ error: error.message });
@@ -17,9 +19,13 @@ export class ShipmentController {
 
   static async getAll(req: Request, res: Response) {
     try {
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role; // Extract the role
+
       const query = getShipmentsQuerySchema.parse(req.query);
       const filters = { status: query.status, client: query.client, carrier: query.carrier };
-      const result = await ShipmentService.getShipments(filters, query.page, query.limit);
+      
+      const result = await ShipmentService.getShipments(filters, query.page, query.limit, userId, userRole);
       return res.status(200).json(result);
     } catch (error: any) {
       return res.status(400).json({ errors: error.errors });
@@ -28,12 +34,21 @@ export class ShipmentController {
 
   static async updateStatus(req: Request, res: Response) {
     try {
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role;
       const validData = updateStatusSchema.parse(req.body);
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+<<<<<<< HEAD
       if (!id) {
         return res.status(400).json({ error: "Shipment ID is required" });
       }
       const result = await ShipmentService.updateStatus(id, validData);
+=======
+      
+      if (!id) return res.status(400).json({ error: "Shipment ID is required" });
+      
+      const result = await ShipmentService.updateStatus(id, validData, userId, userRole);
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
       return res.status(200).json(result);
     } catch (error: any) {
       return res.status(400).json({ errors: error.errors || error.message });
@@ -42,25 +57,32 @@ export class ShipmentController {
 
   static async delete(req: Request, res: Response) {
     try {
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role;
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+<<<<<<< HEAD
       if (!id) {
         return res.status(400).json({ error: "Shipment ID is required" });
       }
       const result = await ShipmentService.cancelShipment(id);
+=======
+      
+      if (!id) return res.status(400).json({ error: "Shipment ID is required" });
+      
+      const result = await ShipmentService.cancelShipment(id, userId, userRole);
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
       return res.status(200).json(result);
     } catch (error: any) {
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ error: error.message || "Internal server error" });
     }
   }
 
   static async uploadCSV(req: Request, res: Response) {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No CSV file uploaded' });
-      }
+      const userId = (req as any).user?.id;
+      if (!req.file) return res.status(400).json({ error: 'No CSV file uploaded' });
 
-      const result = await ShipmentService.processCsvUpload(req.file.path);
-      
+      const result = await ShipmentService.processCsvUpload(req.file.path, userId);
       const statusCode = result.error_count > 0 ? 207 : 201;
       
       return res.status(statusCode).json(result);

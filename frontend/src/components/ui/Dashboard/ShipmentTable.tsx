@@ -1,5 +1,14 @@
+<<<<<<< HEAD
 import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow"
+=======
+"use client";
+
+import { useState } from "react";
+import { ShipmentRowProps } from "@/src/types/types";
+import ShipmentRow from "./ShipmentRow"
+import Pagination from "../Pagination";
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 
 export const shipments: ShipmentRowProps[] = [
   {
@@ -60,6 +69,7 @@ export const shipments: ShipmentRowProps[] = [
 ];
 
 const ShipmentTable = () => {
+<<<<<<< HEAD
   return (
     <div
     style={{
@@ -118,8 +128,75 @@ const ShipmentTable = () => {
                 PAGINATIONS
             </span>
         </div>
+=======
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 48; // As seen in the design
+  const itemsPerPage = 5;
+  const totalItems = 1240;
+
+  const startIdx = (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">
+      {/* Scrollable Container */}
+      <div className="overflow-x-auto w-full">
+        <div className="min-w-[1100px] w-full">
+          {/* TABLE HEADER */}
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 text-[#64748B] text-[12px] font-bold h-[64px] w-full border-b border-[#E2E8F0] bg-slate-50/50">
+            <span className="text-left py-2">SHIPMENT ID & CLIENT</span>
+            <span className="text-center py-2">CARRIER</span>
+            <span className="text-center py-2">DESTINATION</span>
+            <span className="text-center py-2">EXP. DELIVERY</span>
+            <span className="text-center py-2">STATUS</span>
+            <span className="text-center py-2">ALERTS</span>
+            <span className="text-center py-2">ACTIONS</span>
+          </div>
+
+          {/* TABLE CONTENT */}
+          <div className="w-full flex flex-col">
+            {shipments?.map((shipment, idx) => (
+              <ShipmentRow
+                key={idx}
+                shipmentId={shipment.shipmentId}
+                client={shipment.client}
+                expDel={shipment.expDel}
+                lastUpdated={shipment.lastUpdated}
+                carrier={shipment.carrier}
+                dest={shipment.dest}
+                alert={shipment.alert}
+                alertColor={shipment.alertColor}
+                status={shipment.status}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* TABLE FOOTER */}
+      <div className="flex items-center justify-between px-8 py-4 text-[#64748B] text-[12px] bg-white border-t border-[#E2E8F0] w-full">
+        <div className="flex items-center gap-1">
+          <span>SHOWING</span>
+          <span className="text-slate-900 font-semibold px-1">{startIdx}-{endIdx}</span>
+          <span>OF</span>
+          <span className="text-slate-900 font-semibold px-1">{totalItems}</span>
+          <span>SHIPMENTS</span>
+        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
     </div>
   )
 }
 
+<<<<<<< HEAD
 export default ShipmentTable
+=======
+
+export default ShipmentTable
+
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
