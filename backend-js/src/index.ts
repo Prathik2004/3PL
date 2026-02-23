@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import shipmentRoutes from './modules/shipment/route'; // Ensure 'Shipment' matches folder name exactly
 import connectDB from './config/database';
+import userRoutes from './modules/User/UserRoutes';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.get('/health', (req: Request, res: Response) => {
 // Mount the Shipment Module Routes
 // This maps to endpoints like POST /api/shipments and GET /api/shipments 
 app.use('/api/shipments', shipmentRoutes);
+app.use('/api/users', userRoutes);
 
 // Global Error Handler Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
