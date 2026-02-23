@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
- 
+
 export const metadata = {
   title: "Walkwel 3PL Control Lite",
   description: "Operations Visibility and Exception Monitoring",
