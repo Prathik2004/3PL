@@ -71,8 +71,10 @@ class CsvUploadService
 
             // Save shipment
             $shipmentId = (string) Str::uuid();
+            $assignedTo = !empty($row['assign_to']) ? $row['assign_to'] : null;
+
             Shipment::create([
-                'id'                     => $shipmentId,
+                'id'                     => (string) Str::uuid(),
                 'shipment_id'            => $row['shipment_id'],
                 'client_name'            => $row['client_name'],
                 'origin'                 => $row['origin'],
@@ -83,7 +85,7 @@ class CsvUploadService
                 'pod_received'           => filter_var($row['pod_received'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'status'                 => ShipmentStatus::CREATED,
                 'last_status_update'     => DateHelper::nowUtc(),
-                'created_by'             => $userId,
+                'assigned_to'            => $assignedTo,
             ]);
 
             // Log status
