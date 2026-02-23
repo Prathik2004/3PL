@@ -4,8 +4,10 @@ import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 import NewShipmentButton from "@/src/components/ui/NewShipmentButton";
 import { FilterBar } from "@/src/components/common/FilterBar";
 import ExportButton from "@/src/components/ui/ExportButton";
+import ExportModal from "@/src/components/ui/ExportModal";
 
 export default function Dashboard() {
+
   return (
     <div className="w-full bg-[#FFFFFF] p-6 lg:p-10 space-y-8">
       {/* KPI Row: Forced into one line on desktop */}
@@ -46,7 +48,6 @@ export default function Dashboard() {
           iconSrc="/icons/ontime.svg"
         />
       </div>
-
 
       <div className="space-y-6">
         {/* Filter and Action Buttons Row */}
