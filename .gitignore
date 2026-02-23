@@ -8,9 +8,7 @@ out/
 build/
 
 # Backend folders (Specific to your 4-team collaboration)
-/backend-js
-/backend-php
-/backend-python
+
 
 # Environment variables (Crucial for security)
 .env
