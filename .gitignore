@@ -3,7 +3,9 @@
 !.gitignore
 !README.md
 
-!/backend-js/
+/backend-php
+/backend-python
+/frontend
 
 /backend-js/node_modules/
 /backend-js/dist/
