@@ -38,4 +38,5 @@ next-env.d.ts
 # Backend folders
 /backend-js/
 /backend-php/
-/backend-python/
+/backend-python/src/app/test-lab/
+src/app/test-lab/
