@@ -1,3 +1,13 @@
+
+.env
+!.gitignore
+!README.md
+
+!/backend-js/
+
+/backend-js/node_modules/
+/backend-js/dist/
+/backend-js/.package-lock.json
 # Dependency directories
 node_modules/
 jspm_packages/
