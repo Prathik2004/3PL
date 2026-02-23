@@ -23,11 +23,16 @@ export const authenticate = (
 
   const token = authHeader.split(" ")[1];
 
+  if (!token) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
   try {
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
-    ) as { id: string; role: UserRole };
+    ) as unknown as { id: string; role: UserRole };
 
     req.user = {
       id: decoded.id,

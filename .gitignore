@@ -4,10 +4,12 @@
 !README.md
 
 !/backend-js/
+!/backend-php/
 
 /backend-js/node_modules/
 /backend-js/dist/
 /backend-js/.package-lock.json
+/backend-php/vendor/
 # Dependency directories
 node_modules/
 jspm_packages/
