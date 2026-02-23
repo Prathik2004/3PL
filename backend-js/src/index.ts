@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import express, { Request, Response, NextFunction } from 'express';
-import shipmentRoutes from './modules/shipment/route'; // Ensure 'Shipment' matches folder name exactly
-import connectDB from './config/database';
-import userRoutes from './modules/User/UserRoutes';
-import dotenv from 'dotenv';
-=======
 import dns from "dns";
 dns.setServers(["1.1.1.1"]);
 
@@ -16,8 +9,6 @@ import userRoutes from "./modules/User/UserRoutes";
 import connectDB from "./config/database";
 import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
-
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 dotenv.config();
 
 
