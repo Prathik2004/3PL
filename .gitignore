@@ -1,9 +1,12 @@
-# Ignore everything in the root
-/*
 
-# Allow .gitignore and README.md
+/*
+.env
 !.gitignore
 !README.md
 
-# Allow backend-js folder
 !/backend-js/
+
+
+/backend-js/node_modules/
+/backend-js/dist/
+/backend-js/.package-lock.json
