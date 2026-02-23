@@ -1,1 +1,9 @@
-.env
+# Ignore everything in the root
+/*
+
+# Allow .gitignore and README.md
+!.gitignore
+!README.md
+
+# Allow backend-js folder
+!/backend-js/
