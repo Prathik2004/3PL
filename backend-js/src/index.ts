@@ -1,14 +1,20 @@
-import express, { Request, Response, NextFunction } from 'express';
-import shipmentRoutes from './modules/shipment/route'; // Ensure 'Shipment' matches folder name exactly
-import connectDB from './config/database';
-import userRoutes from './modules/User/UserRoutes';
-import dotenv from 'dotenv';
+import dns from "dns";
+dns.setServers(["1.1.1.1"]);
+
+import express, { Request, Response, NextFunction } from "express";
+import shipmentRoutes from "./modules/shipment/route"; // Ensure 'Shipment'
+// matches folder name exactly
+import exceptionRoutes from "./modules/Expections/exceptionRoutes";
+import userRoutes from "./modules/User/UserRoutes";
+import connectDB from "./config/database";
+import dotenv from "dotenv";
+import runExceptionTracker from "./cron/exceptionTracker";
+
 dotenv.config();
 
-import express, { Request, Response, NextFunction } from 'express';
-import shipmentRoutes from './modules/shipment/route';
+
 import authRoutes from "./modules/auth/route";
-import connectDB from './config/database';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,37 +24,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 connectDB();
-
-app.use((req, res, next) => {
-  // We have three dummy users to test with:
-
-  const mockAdmin = { 
-    id: '60d5ecb8b392d700153ef111', 
-    role: 'Admin' 
-  };
-
-  const mockClientA = { 
-    id: '60d5ecb8b392d700153ef222', 
-    role: 'Viewer' // Normal user role
-  };
-
-  const mockClientB = { 
-    id: '60d5ecb8b392d700153ef333', 
-    role: 'Viewer' 
-  };
-
-  // 🔴 CHANGE THE VARIABLE BELOW TO TEST DIFFERENT USERS
-  (req as any).user = mockAdmin; 
-
-  next();
-});
-
-<<<<<<< Updated upstream
-=======
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 // Add this above your app.use('/api/shipments', ...)
->>>>>>> Stashed changes
-app.get('/', (req: Request, res: Response) => {
-  res.send('Walkwel 3PL API is running. Use /api/shipments for data.');
+app.get("/", (req: Request, res: Response) => {
+  res.send("Walkwel 3PL API is running. Use /api/shipments for data.");
 });
 
 // Handle password reset link click
@@ -69,26 +49,34 @@ app.get('/reset-password/:token', (req: Request, res: Response) => {
 });
 
 // Basic Health Check Route
-app.get('/health', (req: Request, res: Response) => {
+app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
-    status: 'UP',
-    message: 'Walkwel 3PL Control Lite API is running'
+    status: "UP",
+    message: "Walkwel 3PL Control Lite API is running",
   });
 });
 
 // Mount the Shipment Module Routes
-// This maps to endpoints like POST /api/shipments and GET /api/shipments 
-app.use('/api/shipments', shipmentRoutes);
-app.use('/api/users', userRoutes);
+// This maps to endpoints like POST /api/shipments and GET /api/shipments
+app.use("/api/shipments", shipmentRoutes);
+app.use("/api/exceptions", exceptionRoutes);
 
 // Global Error Handler Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(500).json({ error: "Internal Server Error" });
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running successfully on http://localhost:${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/health`);
-});
+const startServer = async () => {
+  await connectDB();
+
+  // Start cron AFTER DB connected
+  runExceptionTracker();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+};
+
+startServer();
