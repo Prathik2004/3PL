@@ -9,7 +9,7 @@ import { authenticate } from "./middleware/authenticate";
 import connectDB from "./config/database";
 import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
-
+import userRoutes from "./modules/User/UserRoutes";
 dotenv.config();
 
 
@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 app.use("/api/auth", authRoutes);
-
+app.use("/api/users", userRoutes);
 // Add this above your app.use('/api/shipments', ...)
 app.get("/", (req: Request, res: Response) => {
   res.send("Walkwel 3PL API is running. Use /api/shipments for data.");
