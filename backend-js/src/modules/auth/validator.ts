@@ -36,7 +36,7 @@ export const validate = (schema: z.ZodSchema) => (req: Request, res: Response, n
             query: req.query,
             params: req.params,
         });
-        next();
+        return next();
     } catch (error: any) {
         return res.status(400).json({ error: error.errors });
     }

@@ -25,11 +25,11 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
 
         if (decoded && decoded.role === "admin") {
             (req as any).user = decoded;
-            next();
+            return next();
         } else {
-            res.status(403).json({ message: "Access denied. Admin role required." });
+            return res.status(403).json({ message: "Access denied. Admin role required." });
         }
     } catch (error) {
-        res.status(401).json({ message: "Token is not valid." });
+        return res.status(401).json({ message: "Token is not valid." });
     }
 };
