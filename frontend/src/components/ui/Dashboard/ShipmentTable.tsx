@@ -144,7 +144,7 @@ const ShipmentTable = () => {
       if (currentStatus && currentStatus.toLowerCase() !== 'all') {
          const s = normalize(shipment.status);
          const t = normalize(currentStatus);
-         matchesStatus = s === t || s.includes(t) || t.includes(s);
+         matchesStatus = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
       }
 
       // Carrier Partial Match
@@ -164,7 +164,7 @@ const ShipmentTable = () => {
       if (currentException && currentException.toLowerCase() !== 'all') {
          const s = normalize(shipment.alert);
          const t = normalize(currentException);
-         matchesException = s === t || s.includes(t) || t.includes(s);
+         matchesException = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
       }
 
       return matchesStatus && matchesCarrier && matchesClient && matchesException;
