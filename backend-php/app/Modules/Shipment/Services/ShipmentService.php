@@ -64,13 +64,7 @@ class ShipmentService
             'status', 'client_name', 'carrier_name',
             'date_from', 'date_to', 'search', 'include_cancelled',
         ]);
-
-        // Viewer — only see shipments assigned to them
-        if ($user->role === 'Viewer') {
-            $filters['assigned_to'] = $user->id;
-        }
-
-        $perPage   = (int) $request->get('per_page', 20);
+        $perPage  = (int) $request->get('per_page', 20);
         $paginator = $this->repository->getAll($filters, $perPage);
 
         return ResponseHelper::paginated(
@@ -87,12 +81,6 @@ class ShipmentService
 
         if (!$shipment) {
             return ResponseHelper::notFound('Shipment not found');
-        }
-
-        if ($user->role === 'Viewer' && $shipment->assigned_to !== $user->id) {
-            return ResponseHelper::forbidden(
-                'You do not have access to this shipment.'
-            );
         }
 
         $logs = DB::table('shipment_logs')
