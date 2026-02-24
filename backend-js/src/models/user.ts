@@ -10,9 +10,9 @@ export interface IUser extends Document {
   role: UserRole;
   created_at: Date;
   mustResetPassword: boolean;
-  resetToken?: string;
-  resetTokenExpiry?: Date;
-  refreshToken?: string;
+  resetToken?: string | undefined;
+  resetTokenExpiry?: Date | undefined;
+  refreshToken?: string | undefined;
 }
 
 const UserSchema = new Schema<IUser>({

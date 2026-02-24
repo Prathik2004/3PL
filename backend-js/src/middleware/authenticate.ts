@@ -23,6 +23,11 @@ export const authenticate = (
 
   const token = authHeader.split(" ")[1];
 
+  if (!token) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
   try {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
