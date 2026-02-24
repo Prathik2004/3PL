@@ -4,9 +4,57 @@ import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
 import { ModalProps, CreateShipmentPayload } from "@/src/types/types"
 import { motion } from "motion/react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import BasicDropDownInput from "./BasicDropDownInput"
+
+type StatusProps="Created" | "Dispatched" | "Delayed" | "Delivered" | "In Transit"
 
 const NewShipmentModal = ({onClose}: ModalProps) => {
+
+  const StatusOptions=["Created", "In Transit" , "Dispatched", "Delayed", "Delivered"]
+  const destinationOptions = [
+  "Austin, TX",
+  "Dallas, TX",
+  "Houston, TX",
+  "San Antonio, TX",
+  "Los Angeles, CA",
+  "San Diego, CA",
+  "San Francisco, CA",
+  "Phoenix, AZ",
+  "Denver, CO",
+  "Chicago, IL",
+  "Atlanta, GA",
+  "Miami, FL",
+  "New York, NY",
+  "Seattle, WA",
+  "Las Vegas, NV"
+  ];
+const originDestinationOptions = [
+  "Austin, TX",
+  "Dallas, TX",
+  "Houston, TX",
+  "San Antonio, TX",
+  "Los Angeles, CA",
+  "San Diego, CA",
+  "San Francisco, CA",
+  "Phoenix, AZ",
+  "Denver, CO",
+  "Chicago, IL",
+  "Atlanta, GA",
+  "Miami, FL",
+  "New York, NY",
+  "Seattle, WA",
+  "Las Vegas, NV"
+  ];
+
+  const [shipmentId, setShipmentId]=useState<string>("");
+  const [client, setClient]=useState<string>("");
+  const [carrier,setCarrier]=useState<string>("");
+  const [status, setStatus]=useState<StatusProps>("Created");
+  const [originAddress, setOriginAddress]=useState<string>("");
+  const [dest,setDest]=useState<string>("");
+  const [dispathDate, setDispatchDate]=useState<string>("");
+  const [expDel, setExpDel]=useState("")
 
     useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -69,10 +117,12 @@ const NewShipmentModal = ({onClose}: ModalProps) => {
           <Image src="/icons/logictics.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
-        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" />
-        <BasicInput text="Client Selection" placeholder="#Select Client" />
-        <BasicInput text="Carrier Name" placeholder="Select approved carrier" />
-        <BasicInput text="Current Status" placeholder="Created" />
+        <BasicInput text="Shipment Id" value={shipmentId} placeholder="#SHP-77241-LX"
+        onChange={(e) => setShipmentId(e.target.value)}/>
+        <BasicInput text="Client Selection" value={client} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)} />
+        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} />
+        <BasicDropDownInput text="Current Status" value={status} options={StatusOptions} onChange={(e) => setStatus(e.target.value as StatusProps)} 
+        />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
       <div className="flex flex-col gap-5">
@@ -80,10 +130,10 @@ const NewShipmentModal = ({onClose}: ModalProps) => {
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicInput text="Origin address" placeholder="Enter Origin Address" />
-        <BasicInput text="Destination address" placeholder="Enter Destination Address" />
-        <BasicInput text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" />
-        <BasicInput text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" />
+        <BasicInput text="Origin address" value={originAddress} placeholder="Enter origin address"  onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDest(e.target.value)} />
+        <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
+        <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
       </div>
     </div>
     {/* MODAL FOOTER */}

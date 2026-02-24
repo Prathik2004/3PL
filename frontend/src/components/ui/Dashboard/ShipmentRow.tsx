@@ -8,7 +8,7 @@ import EditShipmentModal from "../EditShipmentModal";
 import { AnimatePresence } from "motion/react";
 
 
-const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
+const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, origin, alertColor = "None" }: ShipmentRowProps) => {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -29,6 +29,7 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
           carrier={carrier}
           dest={dest}
           status={status}
+          origin={origin}
           onClose={() => setEditModalOpen(false)} />}
 
         {deleteModalOpen && <DeleteModal shipmentId={shipmentId} onClose={() => setDeleteModalOpen(false)} />}

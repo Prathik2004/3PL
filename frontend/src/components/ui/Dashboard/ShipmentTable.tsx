@@ -1,5 +1,4 @@
 "use client";
-
 import { Key, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShipmentRowProps } from "@/src/types/types";
