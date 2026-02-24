@@ -74,7 +74,7 @@ const DeleteModal = ({ shipmentId, onClose }: DeleteModalProps) => {
         className='w-[30%] h-76 flex flex-col items-center justify-center bg-white border border-[#E2E8F0] rounded-xl gap-5 p-8 '>
 
         <div className='w-16 h-16 rounded-full flex items-center justify-center bg-[#EE2B2B1A]'>
-          <Image src="icons/redDelete.svg" alt="Delete" width={30} height={30} className='text-red-500' />
+          <Image src="/icons/redDelete.svg" alt="Delete" width={30} height={30} className='text-red-500' />
         </div>
         <span className='text-black text-[24px]/[32px] font-bold'>
           Delete Shipment

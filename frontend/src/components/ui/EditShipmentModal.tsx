@@ -128,7 +128,7 @@ const originDestinationOptions = [
         <span className="text-[12px] text-[#64748B]">Update logistics details and status history.</span>
       </div>
       <button onClick={onClose} className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
-        <Image src="icons/cross.svg" alt="close" width={10} height={10} />
+        <Image src="/icons/cross.svg" alt="close" width={10} height={10} />
       </button>
       </div>
       {/* CONTENT - LOGISTICS & TIMELINE */}
