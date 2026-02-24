@@ -31,7 +31,7 @@ class ResponseHelper
         int $code = 400
     ): JsonResponse {
         return response()->json([
-            'success' => false,
+            'status' => false,
             'message' => $message,
             'errors'  => $errors,
         ], $code);
