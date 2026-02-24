@@ -1,21 +1,20 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
+import mongoose, { Schema, Document, Types } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export enum ShipmentStatus {
-  CREATED = 'Created',
-  DISPATCHED = 'Dispatched',
-  IN_TRANSIT = 'In Transit',
-  OUT_FOR_DELIVERY = 'Out for Delivery',
-  DELIVERED = 'Delivered',
-  DELAYED = 'Delayed',
-  CANCELLED = 'Cancelled'
+  CREATED = "Created",
+  DISPATCHED = "Dispatched",
+  IN_TRANSIT = "In Transit",
+  OUT_FOR_DELIVERY = "Out for Delivery",
+  DELIVERED = "Delivered",
+  DELAYED = "Delayed",
+  CANCELLED = "Cancelled",
 }
 
-// 1. Define the Interface for TypeScript
 export interface IShipment extends Document {
-  id: string; 
+  id: string;
   shipment_id: string;
-  client_name: string; // Manual input for the client/company name
+  client_name: string;
   origin: string;
   destination: string;
   dispatch_date: Date;
@@ -31,28 +30,38 @@ export interface IShipment extends Document {
 }
 
 // 2. Define the Schema for Mongoose
-const ShipmentSchema: Schema = new Schema({
-  id: { type: String, default: uuidv4, unique: true }, 
-  shipment_id: { type: String, required: true, unique: true },
-  client_name: { type: String, required: true }, // Input from CSV or Form
-  origin: { type: String, required: true },
-  destination: { type: String, required: true },
-  dispatch_date: { type: Date, required: true },
-  expected_delivery_date: { type: Date, required: true },
-  delivered_date: { type: Date, default: null },
-  status: { 
-    type: String, 
-    enum: Object.values(ShipmentStatus), 
-    default: ShipmentStatus.CREATED 
+const ShipmentSchema: Schema = new Schema(
+  {
+    id: { type: String, default: uuidv4, unique: true },
+    shipment_id: { type: String, required: true, unique: true },
+    client_name: { type: String, required: true }, // Input from CSV or Form
+    origin: { type: String, required: true },
+    destination: { type: String, required: true },
+    dispatch_date: { type: Date, required: true },
+    expected_delivery_date: { type: Date, required: true },
+    delivered_date: { type: Date, default: null },
+    status: {
+      type: String,
+      enum: Object.values(ShipmentStatus),
+      default: ShipmentStatus.CREATED,
+    },
+    carrier_name: { type: String, required: true },
+    last_status_update: { type: Date, default: Date.now },
+    pod_received: { type: Boolean, default: false },
+    created_by: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Linked User
   },
-  carrier_name: { type: String, required: true },
-  last_status_update: { type: Date, default: Date.now },
-  pod_received: { type: Boolean, default: false },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true } // Linked User
-}, { 
-  // Custom timestamp names as per your requirement
-  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } 
+  {
+    // Custom timestamp names as per your requirement
+    timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
+  },
+);
+
+// Virtual link to User model
+ShipmentSchema.virtual("creator_details", {
+  ref: "User",
+  localField: "created_by",
+  foreignField: "id", // Assumes your User model has a field 'id' for the UUID
+  justOne: true,
 });
 
-// 3. Export the Model
-export const Shipment = mongoose.model<IShipment>('Shipment', ShipmentSchema);
+export const Shipment = mongoose.model<IShipment>("Shipment", ShipmentSchema);

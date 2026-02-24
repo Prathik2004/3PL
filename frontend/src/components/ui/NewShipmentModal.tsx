@@ -2,7 +2,7 @@
 import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
-import { ModalProps } from "@/src/types/types"
+import { ModalProps, CreateShipmentPayload } from "@/src/types/types"
 import { motion } from "motion/react"
 import { useEffect } from "react"
 

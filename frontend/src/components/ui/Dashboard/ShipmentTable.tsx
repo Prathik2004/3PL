@@ -1,128 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow"
 import Pagination from "../Pagination";
-
-export const shipments: ShipmentRowProps[] = [
-  {
-    shipmentId: "#SHP-98231",
-    client: "Alpha Retail Solutions",
-    lastUpdated: "3hrs",
-    carrier: "FedEx Ground",
-    dest: "Austin, TX",
-    expDel: "24/10 14:00",
-    alert: "-",
-    alertColor: "None",
-    status: "IN TRANSIT",
-  },
-  {
-    shipmentId: "#SHP-98245",
-    client: "Zion Logistics Group",
-    lastUpdated: "52hrs",
-    carrier: "UPS Express",
-    dest: "Chicago, IL",
-    expDel: "24/10 14:00",
-    alert: "NO UPDATE",
-    alertColor: "Yellow",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98250",
-    client: "Metro Food Dist.",
-    lastUpdated: "1hr",
-    carrier: "DHL Global",
-    dest: "Seattle, WA",
-    expDel: "25/10 10:00",
-    alert: "-",
-    alertColor: "None",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98255",
-    client: "Summit Outfitter",
-    lastUpdated: "4hrs",
-    carrier: "FedEx Ground",
-    dest: "New York, NY",
-    expDel: "22/10 16:45",
-    alert: "MISSING POD",
-    alertColor: "Yellow",
-    status: "DELIVERED",
-  },
-  {
-    shipmentId: "#SHP-98260",
-    client: "Global Tech Parts",
-    lastUpdated: "1hr",
-    carrier: "Regional Xpress",
-    dest: "Denver, CO",
-    expDel: "21/10 09:00",
-    alert: "CRITICAL DELAY",
-    alertColor: "Red",
-    status: "DELAYED",
-  },
-  {
-    shipmentId: "#SHP-98231",
-    client: "Alpha Retail Solutions",
-    lastUpdated: "3hrs",
-    carrier: "FedEx Ground",
-    dest: "Austin, TX",
-    expDel: "24/10 14:00",
-    alert: "-",
-    alertColor: "None",
-    status: "IN TRANSIT",
-  },
-  {
-    shipmentId: "#SHP-98245",
-    client: "Zion Logistics Group",
-    lastUpdated: "52hrs",
-    carrier: "UPS Express",
-    dest: "Chicago, IL",
-    expDel: "24/10 14:00",
-    alert: "NO UPDATE",
-    alertColor: "Yellow",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98250",
-    client: "Metro Food Dist.",
-    lastUpdated: "1hr",
-    carrier: "DHL Global",
-    dest: "Seattle, WA",
-    expDel: "25/10 10:00",
-    alert: "-",
-    alertColor: "None",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98255",
-    client: "Summit Outfitter",
-    lastUpdated: "4hrs",
-    carrier: "FedEx Ground",
-    dest: "New York, NY",
-    expDel: "22/10 16:45",
-    alert: "MISSING POD",
-    alertColor: "Yellow",
-    status: "DELIVERED",
-  },
-  {
-    shipmentId: "#SHP-98260",
-    client: "Global Tech Parts",
-    lastUpdated: "1hr",
-    carrier: "Regional Xpress",
-    dest: "Denver, CO",
-    expDel: "21/10 09:00",
-    alert: "CRITICAL DELAY",
-    alertColor: "Red",
-    status: "DELAYED",
-  },
-];
+import { shipmentService } from "../../../services/shipmentService";
 
 const ShipmentTable = () => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 1. Safely extract our Filter parameters from the URL
   const currentStatus = searchParams.get('status') || 'all';
@@ -130,56 +22,74 @@ const ShipmentTable = () => {
   const currentClient = searchParams.get('client') || 'all';
   const currentException = searchParams.get('exceptions') || 'all';
 
-  // 2. Perform Filtering logic locally over dummy data (to simulate backend DB query)
-  const filteredShipments = useMemo(() => {
-    // Repeat dummy data twice just for volume like you had
-    const allShipments = [...shipments, ...shipments];
+  useEffect(() => {
+    const fetchShipments = async () => {
+      setIsLoading(true);
+      try {
+        const filters: Record<string, string> = {};
+        if (currentStatus !== 'all') filters.status = currentStatus;
+        if (currentClient !== 'all') filters.client = currentClient;
 
-    return allShipments.filter((shipment) => {
-      // Normalize helpers
-      const normalize = (str: string | null) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      
-      // Status Match
-      let matchesStatus = true;
-      if (currentStatus && currentStatus.toLowerCase() !== 'all') {
-         const s = normalize(shipment.status);
-         const t = normalize(currentStatus);
-         matchesStatus = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
+        const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, filters);
+
+        let fetchedData = res.data || [];
+
+        // Optional client-side filtering if API doesn't support carrier/alerts natively
+        if (currentCarrier !== 'all') {
+          fetchedData = fetchedData.filter(s => (s.carrier_name || '').toLowerCase().includes(currentCarrier.toLowerCase()));
+        }
+
+        const mapped: ShipmentRowProps[] = fetchedData.map(s => {
+          let alert = "-";
+          let alertColor: "Red" | "Yellow" | "None" = "None";
+
+          if (s.status.toLowerCase() === "delayed") {
+            alert = "DELAYED"; alertColor = "Red";
+          } else if (!s.pod_received && s.status.toLowerCase() === "delivered") {
+            alert = "MISSING POD"; alertColor = "Yellow";
+          }
+
+          if (currentException !== 'all') {
+            // Let client side handle exception filter
+          }
+
+          const dateStr = s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString() : "";
+
+          return {
+            shipmentId: s.shipment_id,
+            client: s.client_name,
+            lastUpdated: s.created_at ? new Date(s.created_at).toLocaleDateString() : "-",
+            carrier: s.carrier_name,
+            dest: s.destination,
+            expDel: dateStr,
+            alert,
+            alertColor,
+            status: s.status.toUpperCase(),
+          }
+        });
+
+        // if exception filter applied client side
+        let finalData = mapped;
+        if (currentException !== 'all') {
+          finalData = finalData.filter(s => (s.alert || '').toLowerCase().includes(currentException.toLowerCase()));
+        }
+
+        setDisplayShipments(finalData);
+        setTotalItems(res.total || finalData.length);
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Carrier Partial Match
-      let matchesCarrier = true;
-      if (currentCarrier && currentCarrier.toLowerCase() !== 'all') {
-         matchesCarrier = (shipment.carrier || '').toLowerCase().includes(currentCarrier.toLowerCase());
-      }
+    fetchShipments();
+  }, [currentPage, itemsPerPage, currentStatus, currentCarrier, currentClient, currentException]);
 
-      // Client Partial Match
-      let matchesClient = true;
-      if (currentClient && currentClient.toLowerCase() !== 'all') {
-         matchesClient = (shipment.client || '').toLowerCase().includes(currentClient.toLowerCase());
-      }
-
-      // Exception Exact Match
-      let matchesException = true;
-      if (currentException && currentException.toLowerCase() !== 'all') {
-         const s = normalize(shipment.alert);
-         const t = normalize(currentException);
-         matchesException = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
-      }
-
-      return matchesStatus && matchesCarrier && matchesClient && matchesException;
-    });
-  }, [currentStatus, currentCarrier, currentClient, currentException]);
-
-  // 3. Dynamic Pagination based on filtered results
-  const totalItems = filteredShipments.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
   const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
-
-  // 4. Finally slice precisely what to render
-  const displayShipments = filteredShipments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">

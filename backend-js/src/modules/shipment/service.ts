@@ -1,5 +1,7 @@
 import fs from 'fs';
 import csv from 'csv-parser';
+import { Parser } from 'json2csv';
+import * as XLSX from 'xlsx';
 import { Shipment } from '../../models/shipment';
 import { ShipmentStatus, UserRole } from '../../types';
 import { createShipmentSchema } from './validator';
@@ -9,7 +11,7 @@ export class ShipmentService {
     static async processCsvUpload(filePath: string, userId: string): Promise<any> {
         const results: { row: number, data: any }[] = [];
         const errors: any[] = [];
-        let rowNumber = 1; 
+        let rowNumber = 1;
 
         return new Promise((resolve, reject) => {
             fs.createReadStream(filePath)
@@ -19,20 +21,17 @@ export class ShipmentService {
                     results.push({ row: rowNumber, data });
                 })
                 .on('end', async () => {
-                    const successfulInserts: string[] = []; // Explicitly type as string array
+                    const successfulInserts: string[] = [];
 
                     for (const item of results) {
                         try {
                             const validData = createShipmentSchema.parse(item.data);
-
                             const existing = await Shipment.findOne({ shipment_id: validData.shipment_id });
-                            if (existing) {
-                                throw new Error("Duplicate shipment_id");
-                            }
+                            if (existing) throw new Error("Duplicate shipment_id");
 
                             const newShipment = await Shipment.create({
                                 ...validData,
-                                created_by: userId, // Changed from user_id to created_by
+                                created_by: userId,
                                 status: ShipmentStatus.CREATED,
                                 pod_received: false,
                                 last_status_update: new Date(),
@@ -47,9 +46,7 @@ export class ShipmentService {
                             });
                         }
                     }
-
                     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
                     resolve({
                         total_processed: rowNumber - 1,
                         successful_count: successfulInserts.length,
@@ -71,7 +68,7 @@ export class ShipmentService {
 
         return await Shipment.create({
             ...data,
-            created_by: userId, // Changed from user_id to created_by
+            created_by: userId,
             status: ShipmentStatus.CREATED,
             last_status_update: new Date()
         });
@@ -79,19 +76,21 @@ export class ShipmentService {
 
     static async getShipments(filters: any, page: number, limit: number, userId: string, userRole: string) {
         const skip = (page - 1) * limit;
-        
         const query: any = { status: { $ne: ShipmentStatus.CANCELLED } };
 
-        // Admin/Operations see everything, others only see what they created
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.created_by = userId; // Changed from user_id to created_by
+            query.created_by = userId;
         }
 
         if (filters.status) query.status = filters.status;
         if (filters.client) query.client_name = { $regex: filters.client, $options: 'i' };
 
         const [data, total] = await Promise.all([
-            Shipment.find(query).sort({ created_at: -1 }).skip(skip).limit(limit),
+            Shipment.find(query)
+                .sort({ created_at: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate('creator_details', 'name email'), // Join with User table
             Shipment.countDocuments(query)
         ]);
 
@@ -100,9 +99,8 @@ export class ShipmentService {
 
     static async updateStatus(id: string, updateData: any, userId: string, userRole: string) {
         const query: any = { id };
-        
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.created_by = userId; // Changed from user_id to created_by
+            query.created_by = userId;
         }
 
         const shipment = await Shipment.findOne(query);
@@ -115,7 +113,7 @@ export class ShipmentService {
         }
 
         return await Shipment.findOneAndUpdate(
-            query, 
+            query,
             { ...updateData, last_status_update: new Date() },
             { new: true }
         );
@@ -123,9 +121,8 @@ export class ShipmentService {
 
     static async cancelShipment(id: string, userId: string, userRole: string) {
         const query: any = { id };
-        
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
-            query.created_by = userId; // Changed from user_id to created_by
+            query.created_by = userId;
         }
 
         const shipment = await Shipment.findOneAndUpdate(
@@ -133,8 +130,42 @@ export class ShipmentService {
             { status: ShipmentStatus.CANCELLED, last_status_update: new Date() },
             { new: true }
         );
-        
         if (!shipment) throw new Error("Shipment not found or unauthorized");
         return shipment;
+    }
+
+    static async exportShipments(userId: string, userRole: string, format: 'csv' | 'xlsx') {
+        const query: any = {};
+        if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
+            query.created_by = userId;
+        }
+
+        // We use populate here too so the export shows names, not just IDs
+        const shipments = await Shipment.find(query)
+            .sort({ created_at: -1 })
+            .populate('creator_details', 'name')
+            .lean();
+        
+        const exportData = shipments.map((s: any) => ({
+            'Shipment ID': s.shipment_id,
+            'Client Name': s.client_name,
+            'Origin': s.origin,
+            'Destination': s.destination,
+            'Status': s.status,
+            'Carrier': s.carrier_name,
+            'Created By': s.creator_details?.name || s.created_by, // Fallback to ID if name not found
+            'Dispatch Date': s.dispatch_date ? new Date(s.dispatch_date).toLocaleDateString() : 'N/A',
+            'Exp Delivery Date': s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString() : 'N/A'
+        }));
+
+        if (format === 'csv') {
+            const json2csvParser = new Parser();
+            return json2csvParser.parse(exportData);
+        } else {
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Shipments');
+            return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        }
     }
 }
