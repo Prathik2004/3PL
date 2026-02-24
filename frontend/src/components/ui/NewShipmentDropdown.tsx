@@ -1,6 +1,10 @@
 "use client";
-
 import Image from "next/image";
+import { useState } from "react";
+import BulkUploadModal from "./BulkUploadModal";
+import NewShipmentModal from "./NewShipmentModal";
+import { AnimatePresence } from "motion/react";
+
 
 interface DropdownItemProps {
   icon: string;
@@ -25,6 +29,11 @@ const DropdownItem = ({ icon, title, description, onClick }: DropdownItemProps) 
 );
 
 export default function NewShipmentDropdown() {
+
+  const [openBulkEntry, setOpenBulkEntry]=useState(false);
+  const [openNewShipmentModal, setOpenNewShipmentModal]=useState(false);
+
+
   return (
     <div className="absolute top-12 right-0 w-[320px] bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
       {/* 3.1 Functional Requirements: Manual Entry  */}
@@ -32,16 +41,24 @@ export default function NewShipmentDropdown() {
         icon="/icons/Container.svg"
         title="Manual Entry"
         description="Create one single order"
-        onClick={() => console.log("Manual Entry Clicked")}
+        onClick={() => {
+          setOpenNewShipmentModal(true);
+          console.log("Manual Entry Clicked")}}
       />
+      <AnimatePresence>
+        {openNewShipmentModal && <NewShipmentModal onClose={()=> setOpenNewShipmentModal(false)} />}
+      </AnimatePresence>
 
       {/* 3.1 Functional Requirements: CSV Bulk Upload  */}
       <DropdownItem 
         icon="/icons/bulkUpload.svg"
         title="Bulk Upload CSV"
         description="Process multiple shipments"
-        onClick={() => console.log("Bulk Upload Clicked")}
+        onClick={() => {
+          setOpenBulkEntry(true)
+          console.log("Bulk Upload Clicked")}}
       />
+      {openBulkEntry && <BulkUploadModal onClose={()=>setOpenBulkEntry(false)} />}
 
       {/* Footer per Figma design */}
       <div className="bg-[#F8FAFC] py-3 px-4 text-center border-t border-slate-50">
