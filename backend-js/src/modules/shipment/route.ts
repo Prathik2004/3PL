@@ -7,7 +7,9 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 const router = Router();
 
-// Assuming anyone logged in can upload CSV (or add authorizeRoles if needed)
+// Export - All logged in users can export their own (or all if admin) data
+router.get('/export', authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), ShipmentController.export);
+
 router.post('/upload', upload.single('file'), ShipmentController.uploadCSV);
 
 // Viewer, Operations, and Admin can read shipments 

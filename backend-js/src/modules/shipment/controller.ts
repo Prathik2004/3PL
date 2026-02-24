@@ -52,6 +52,9 @@ export class ShipmentController {
 
       if (!id) return res.status(400).json({ error: "Shipment ID is required" });
 
+      if (!id || !userId || !userRole) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+      }
       const result = await ShipmentService.updateStatus(id, validData, userId, userRole);
       return res.status(200).json(result);
     } catch (error: any) {
@@ -68,6 +71,7 @@ export class ShipmentController {
       if (!id) return res.status(400).json({ error: "Shipment ID is required" });
 
       const result = await ShipmentService.cancelShipment(id, userId, userRole);
+
       return res.status(200).json(result);
     } catch (error: any) {
       return res.status(500).json({ error: error.message || "Internal server error" });
@@ -78,13 +82,33 @@ export class ShipmentController {
     try {
       const userId = (req as any).user?.id;
       if (!req.file) return res.status(400).json({ error: 'No CSV file uploaded' });
-
       const result = await ShipmentService.processCsvUpload(req.file.path, userId);
-      const statusCode = result.error_count > 0 ? 207 : 201;
-
-      return res.status(statusCode).json(result);
+      return res.status(result.error_count > 0 ? 207 : 201).json(result);
     } catch (error: any) {
-      return res.status(500).json({ error: 'Internal server error during CSV processing' });
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  // NEW EXPORT CONTROLLER
+  static async export(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role;
+      const format = req.query.format === 'xlsx' ? 'xlsx' : 'csv';
+
+      const data = await ShipmentService.exportShipments(userId, userRole, format);
+
+      if (format === 'csv') {
+        res.header('Content-Type', 'text/csv');
+        res.attachment(`shipments_${Date.now()}.csv`);
+        return res.send(data);
+      } else {
+        res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.attachment(`shipments_${Date.now()}.xlsx`);
+        return res.send(data);
+      }
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
     }
   }
 }

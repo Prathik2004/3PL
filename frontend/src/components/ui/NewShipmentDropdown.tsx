@@ -42,7 +42,7 @@ export default function NewShipmentDropdown({onClose} : ModalProps) {
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        onClose();   // 🔥 close dropdown
+        onClose();  
       }
     };
 
@@ -61,7 +61,7 @@ export default function NewShipmentDropdown({onClose} : ModalProps) {
         description="Create one single order"
         onClick={() => {
           setOpenNewShipmentModal(true);
-          onClose();
+          // onClose();
           console.log("Manual Entry Clicked")
         }}
       />
@@ -76,7 +76,7 @@ export default function NewShipmentDropdown({onClose} : ModalProps) {
         description="Process multiple shipments"
         onClick={() => {
           setOpenBulkEntry(true);
-          onClose();
+          // onClose();
           console.log("Bulk Upload Clicked")}}
       />
       <AnimatePresence >

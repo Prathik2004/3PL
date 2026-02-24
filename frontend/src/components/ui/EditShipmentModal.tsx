@@ -5,16 +5,16 @@ import BasicButton from "./BasicButton"
 import { motion } from "motion/react";
 import { useEffect } from "react";
 
-interface EditShipmentModalProps{
-    shipmentId?: string;
-    client?: string;
-    carrier?: string;
-    status?: string;
-    origin?: string;
-    dest?: string;
-    dispatchDate?: Date;
-    expDelivery?: Date;
-    onClose: ()=> void
+interface EditShipmentModalProps {
+  shipmentId?: string;
+  client?: string;
+  carrier?: string;
+  status?: string;
+  origin?: string;
+  dest?: string;
+  dispatchDate?: Date;
+  expDelivery?: Date;
+  onClose: () => void
 }
 
 const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery, onClose}: EditShipmentModalProps) => {

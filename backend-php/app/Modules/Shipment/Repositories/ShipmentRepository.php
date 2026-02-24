@@ -28,14 +28,42 @@ class ShipmentRepository
         return $shipment->fresh();
     }
 
-   public function getAll(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    public function getAll(array $filters = [], int $perPage = 20): LengthAwarePaginator
 {
     $query = Shipment::query();
 
-    if (!empty($filters['created_by'])) {
-        $query->where('created_by', $filters['created_by']);
+    if (!empty($filters['assigned_to'])) {
+        $query->where('assigned_to', $filters['assigned_to']);
+    }
+    if (!empty($filters['status'])) {
+        $query->where('status', $filters['status']);
+    }
+    if (!empty($filters['client_name'])) {
+        $query->where('client_name', 'like', '%' . $filters['client_name'] . '%');
+    }
+    if (!empty($filters['carrier_name'])) {
+        $query->where('carrier_name', $filters['carrier_name']);
+    }
+    if (!empty($filters['date_from'])) {
+        $query->whereDate('dispatch_date', '>=', $filters['date_from']);
+    }
+    if (!empty($filters['date_to'])) {
+        $query->whereDate('dispatch_date', '<=', $filters['date_to']);
+    }
+    if (!empty($filters['search'])) {
+        $query->where(function ($q) use ($filters) {
+            $q->where('shipment_id', 'like', '%' . $filters['search'] . '%')
+              ->orWhere('client_name', 'like', '%' . $filters['search'] . '%');
+        });
+    }
+    if (empty($filters['include_cancelled'])) {
+        $query->where('status', '!=', 'Cancelled');
     }
 
+    return $query->latest()->paginate($perPage);
+}
+
+public function test(){
     if (!empty($filters['status'])) {
         $query->where('status', $filters['status']);
     }

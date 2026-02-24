@@ -12,12 +12,7 @@ const ShipmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // State for backend data
-  const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Extract Filter parameters from the URL
+  // 1. Safely extract our Filter parameters from the URL
   const currentStatus = searchParams.get('status') || 'all';
   const currentClient = searchParams.get('client') || 'all';
   // Note: currentCarrier and currentException can be added to the filters object 

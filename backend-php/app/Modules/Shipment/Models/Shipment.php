@@ -27,7 +27,7 @@ class Shipment extends Model
         'carrier_name',
         'pod_received',
         'last_status_update',
-        'created_by',
+        'assigned_to',
     ];
 
     protected function casts(): array
