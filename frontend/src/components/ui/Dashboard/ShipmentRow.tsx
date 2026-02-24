@@ -1,6 +1,7 @@
 "use client"
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
+<<<<<<< HEAD
 import { ShipmentRowProps } from "@/src/types/types";
 import { useState } from "react";
 import DeleteModal from "../DeleteModal";
@@ -97,9 +98,13 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
         </button>
 
       </div>
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
     </div>
   )
 }
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 export default ShipmentRow

@@ -5,6 +5,7 @@ namespace App\Modules\Auth\Services;
 use App\Modules\Auth\Repositories\AuthRepository;
 use App\Modules\Auth\Validators\RegisterValidator;
 use App\Modules\Auth\Validators\LoginValidator;
+use App\Modules\Auth\Validators\UpdatePasswordValidator;
 use App\Utils\ResponseHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
@@ -92,4 +93,28 @@ class AuthService
             'created_at' => $user->created_at,
         ];
     }
+
+    public function forgot(array $data): JsonResponse
+    {
+        $validator = UpdatePasswordValidator::validate($data);
+
+        if ($validator->fails()) {
+            return ResponseHelper::validationError(
+                $validator->errors()->toArray()
+            );
+        }
+
+        // Find user
+        $user = $this->repository->findByEmail($data['email']);
+
+        if (!$user) {
+            return ResponseHelper::notFound('No account found with this email.');
+        }
+
+        // Save new password
+        $user->password = \Illuminate\Support\Facades\Hash::make($data['password']);
+        $user->save();
+
+        return ResponseHelper::success('Password updated successfully. Please login with your new password.');
+    }   
 }
