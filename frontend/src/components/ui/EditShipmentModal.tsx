@@ -3,7 +3,8 @@ import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
 import { motion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import BasicDropDownInput from "./BasicDropDownInput";
 
 interface EditShipmentModalProps {
   shipmentId?: string;
@@ -14,7 +15,7 @@ interface EditShipmentModalProps {
   dest?: string;
   dispatchDate?: Date;
   expDelivery?: Date;
-  onClose: () => void
+  onClose?: () => void
 }
 
 const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery, onClose}: EditShipmentModalProps) => {
@@ -22,9 +23,10 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        onClose?.();
       }
     };
+
 
     window.addEventListener("keydown", handleEsc);
 
@@ -33,6 +35,64 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
       window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
+
+  const StatusOptions=["In Transit", "Created", "Dispatched", "Delayed", "Delivered"]
+  const destinationOptions = [
+    "Austin, TX",
+    "Dallas, TX",
+    "Houston, TX",
+    "San Antonio, TX",
+    "Los Angeles, CA",
+    "San Diego, CA",
+    "San Francisco, CA",
+    "Phoenix, AZ",
+    "Denver, CO",
+    "Chicago, IL",
+    "Atlanta, GA",
+    "Miami, FL",
+    "New York, NY",
+    "Seattle, WA",
+    "Las Vegas, NV"
+  ];
+const originDestinationOptions = [
+    "Austin, TX",
+    "Dallas, TX",
+    "Houston, TX",
+    "San Antonio, TX",
+    "Los Angeles, CA",
+    "San Diego, CA",
+    "San Francisco, CA",
+    "Phoenix, AZ",
+    "Denver, CO",
+    "Chicago, IL",
+    "Atlanta, GA",
+    "Miami, FL",
+    "New York, NY",
+    "Seattle, WA",
+    "Las Vegas, NV"
+  ];
+  const deliveryServicesOptions = [
+    "UPS",
+    "FedEx",
+    "USPS",
+    "DHL Express",
+    "Amazon Logistics",
+    "OnTrac",
+    "LaserShip",
+    "Spee-Dee Delivery",
+    "Purolator",
+    "GLS"
+  ];
+
+    const [shipment_Id, setShipmentId]=useState<string>("");
+    const [clientName, setClient]=useState<string>("");
+    const [carrierMame,setCarrier]=useState<string>("");
+    const [Status, setStatus]=useState<string>("");
+    const [originAddress, setOriginAddress]=useState<string>("");
+    const [destination,setDestination]=useState<string>("");
+    const [dispathDate, setDispatchDate]=useState<string>("");
+    const [expDel, setExpDel]=useState("")
+
   return (
     <div onClick={onClose}
     style={{
@@ -68,7 +128,7 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
         <span className="text-[12px] text-[#64748B]">Update logistics details and status history.</span>
       </div>
       <button onClick={onClose} className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
-        <Image src="icons/cross.svg" alt="close" width={10} height={10} />
+        <Image src="/icons/cross.svg" alt="close" width={10} height={10} />
       </button>
       </div>
       {/* CONTENT - LOGISTICS & TIMELINE */}
@@ -79,10 +139,13 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
           <Image src="/icons/logictics.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
-        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" value={shipmentId} />
-        <BasicInput text="Client Selection" placeholder="#Select Client" value={client} />
-        <BasicInput text="Carrier Name" placeholder="Select approved carrier" value={carrier} />
-        <BasicInput text="Current Status" placeholder="Created" value={status} />
+        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" 
+        value={shipmentId}
+        onChange={(e) => setShipmentId(e.target.value)}/>
+        <BasicInput text="Client Selection" value={client} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)}  />
+        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} value={carrier} />
+        <BasicDropDownInput text="Current Status" options={StatusOptions} value={status} onChange={(e) => setStatus(e.target.value)} 
+        />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
       <div className="flex flex-col gap-5">
@@ -90,12 +153,12 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicInput text="Origin address" placeholder="Enter Origin Address" value={origin} />
-        <BasicInput text="Destination address" placeholder="Enter Destination Address" value={dest} />
-        <BasicInput text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" value={dispatchDate?.toString()} />
-        <BasicInput text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" value={expDelivery?.toString()} />
+        <BasicInput text="Origin address" placeholder="Enter origin address" value={origin} onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDestination(e.target.value)} />
+        <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
+        <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
       </div>
-    </div>
+      </div>
     {/* MODAL FOOTER */}
     <div className="bg-[#E2E8F0] flex items-center justify-between rounded-b-xl py-5 px-8">
       <div className="flex items-center justify-center gap-2">
