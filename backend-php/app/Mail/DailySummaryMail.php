@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class DailySummaryMail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(
+        public array $exceptions,
+        public int   $totalCount
+    ) {}
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Daily Exception Summary — Walkwel 3PL Control Lite',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'emails.daily-summary',
+            with: [
+                'exceptions' => $this->exceptions,
+                'totalCount' => $this->totalCount,
+            ]
+        );
+    }
+}

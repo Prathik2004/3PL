@@ -1,0 +1,104 @@
+"use client"
+import Image from "next/image";
+import StatusIcon from "./StatusIcon";
+import { ShipmentRowProps } from "@/src/types/types";
+import { useState } from "react";
+import DeleteModal from "../DeleteModal";
+import EditShipmentModal from "../EditShipmentModal";
+import { AnimatePresence } from "motion/react";
+
+
+const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  return (
+    <div
+      className={`w-full min-h-20 ${alertColor === "Yellow"
+        ? "bg-[#FFF7ED] hover:bg-[#FFEDD5]"
+        : alertColor === "None"
+          ? "bg-white hover:bg-slate-50"
+          : "bg-[#FFE8E8] hover:bg-[#FEE2E2]"
+        } grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 border-b border-[#E2E8F0] cursor-pointer transition-colors duration-150`}>
+      <AnimatePresence >
+
+        {editModalOpen && <EditShipmentModal
+          shipmentId={shipmentId}
+          client={client}
+          carrier={carrier}
+          dest={dest}
+          status={status}
+          onClose={() => setEditModalOpen(false)} />}
+
+        {deleteModalOpen && <DeleteModal shipmentId={shipmentId} onClose={() => setDeleteModalOpen(false)} />}
+      </AnimatePresence>
+
+      {/* SHIPMENTID & CLIENT */}
+      <div className="flex flex-col py-3">
+        <span className="flex items-center gap-2 font-bold text-[15px] text-slate-700">
+          {shipmentId}
+          {alertColor === "Yellow" && <Image src="/icons/warning.svg" alt="Warning" width={14} height={14} />}
+          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={3} height={3} />}
+        </span>
+        <span className="text-[13px] text-slate-500 font-medium">
+          {client}
+        </span>
+        <span className="text-slate-400 text-[11px] mt-0.5">
+          Last Updated: {lastUpdated} ago
+        </span>
+      </div>
+
+      {/* CARRIER */}
+      <div className="text-center">
+        <span className="text-[14px] text-slate-700 font-medium">
+          {carrier}
+        </span>
+      </div>
+
+      {/* DESTINATION */}
+      <div className="text-center">
+        <span className="text-[14px] text-slate-700"> {dest} </span>
+      </div>
+
+      {/* EXP. DELIVERY */}
+      <div className="flex flex-col items-center text-slate-600 text-[14px]">
+        <span className="font-medium">
+          {expDel?.toString()}
+        </span>
+      </div>
+
+      {/* STATUS */}
+      <div className="flex justify-center">
+        <StatusIcon text={status} />
+      </div>
+
+      {/* ALERTS */}
+      <div className="text-center">
+        <span className={`${alertColor === "Yellow"
+          ? "text-amber-600 bg-amber-50"
+          : alertColor === "Red"
+            ? "text-red-600 bg-red-50"
+            : "text-slate-400"
+          } text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider`}>
+          {alert ?? "-"}
+        </span>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="flex items-center justify-center gap-1 group">
+        <button onClick={() => setEditModalOpen(true)}
+          className="hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40} />
+        </button>
+        <button onClick={() => setDeleteModalOpen(true)}
+          className="p-3 hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18} />
+        </button>
+
+      </div>
+    </div>
+  )
+}
+
+export default ShipmentRow

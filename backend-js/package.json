@@ -1,0 +1,64 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+<<<<<<< HEAD
+    "dotenv": "^17.3.1",
+    "joi": "^18.0.2",
+    "mongoose": "^9.2.1",
+    "nodemon": "^3.1.13"
+  },
+  "devDependencies": {
+=======
+    "bcryptjs": "^3.0.3",
+    "joi": "^18.0.2",
+    "json2csv": "^6.0.0-alpha.2",
+    "mongoose": "^9.2.1",
+    "nodemailer": "^8.0.1",
+    "nodemon": "^3.1.13",
+    "regenerator-runtime": "^0.14.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
+    "@types/express": "^5.0.6",
+    "@types/json2csv": "^5.0.7",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^25.3.0",
+<<<<<<< HEAD
+    "@types/node-cron": "^3.0.11",
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> bbd0ccaf3e2849c525a15a916a2723cca6ef0424
+    "@types/nodemailer": "^7.0.11",
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.1",
+    "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
+    "nodemon": "^3.1.14",
+    "stream": "^0.0.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
+  }
+}
