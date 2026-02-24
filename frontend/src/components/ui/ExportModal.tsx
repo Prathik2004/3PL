@@ -1,7 +1,7 @@
 'use client';
-
 import React, { useState } from 'react';
 import BasicButton from './BasicButton';
+import { motion } from "motion/react"
 
 export interface ExportModalProps {
   onClose?: () => void;
@@ -12,7 +12,29 @@ export const ExportModal = ({ onClose, onExport }: ExportModalProps) => {
   const [format, setFormat] = useState<'csv' | 'excel'>('csv');
 
   return (
-    <div className="w-[430px] rounded-[24px] bg-white p-8 px-10 shadow-[0_12px_45px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center font-sans dark:bg-[#0F0F0F] dark:border-zinc-800">
+    <div className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-100'>
+    <motion.div 
+    initial={{
+        opacity:0,
+        filter: "blur(10px)",
+        scale:0
+      }} 
+      animate={{
+        scale:[1.5, 1],
+        filter: "blur(0px)",
+        opacity:1
+      }}
+      exit={{
+        opacity:0,
+        filter:"blur(10px)",
+        scale:0
+      }}
+      transition={{
+        type: "spring",
+        ease: "easeIn",
+        duration:0.5
+      }}
+    className="w-[430px] rounded-[24px] bg-white p-8 px-10 shadow-[0_12px_45px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center font-sans dark:bg-[#0F0F0F] dark:border-zinc-800">
       
       {/* Icon */}
       <div className="mb-6 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#F8FAFC] dark:bg-[#1A1A1A]">
@@ -64,7 +86,7 @@ export const ExportModal = ({ onClose, onExport }: ExportModalProps) => {
           className="h-12 flex-1 rounded-[10px] bg-[#0F172A] font-medium text-white hover:bg-slate-800 transition-colors dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
         />
       </div>
-
+    </motion.div>
     </div>
   );
 };

@@ -28,7 +28,7 @@ export const createUserByAdmin = async (
     role,
     mustResetPassword: true,
     resetToken,
-    resetTokenExpiry: new Date(Date.now() + 60 * 60 * 1000),
+    resetTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
   });
 
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";

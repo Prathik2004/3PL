@@ -1,6 +1,7 @@
 import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
+import { ModalProps } from "@/src/types/types";
 
 interface EditShipmentModalProps{
     shipmentId?: string;
@@ -11,9 +12,10 @@ interface EditShipmentModalProps{
     dest?: string;
     dispatchDate?: Date;
     expDelivery?: Date;
+    onClose: ()=> void
 }
 
-const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery}: EditShipmentModalProps) => {
+const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery, onClose}: EditShipmentModalProps) => {
   return (
     <div
     style={{
@@ -65,7 +67,7 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
         <span className="text-[12px] text-[#64748B]">POD Received</span>
       </div>
       <div className="flex items-center justify-center gap-2">
-        <BasicButton className="text-black bg-white border border-[#E2E8F0] py-2 px-4 rounded-lg cursor-pointer" text="Cancel" />
+        <BasicButton onClick={onClose} className="text-black bg-white border border-[#E2E8F0] py-2 px-4 rounded-lg cursor-pointer" text="Cancel" />
         <BasicButton className="bg-black text-white py-2 px-4 rounded-lg cursor-pointer" text="Create Shipment" />
       </div>
     </div>

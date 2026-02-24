@@ -18,7 +18,7 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
         <span className="flex items-center gap-2 font-bold text-[15px] text-slate-700">
           {shipmentId}
           {alertColor === "Yellow" && <Image src="/icons/warning.svg" alt="Warning" width={14} height={14} />}
-          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={6} height={6} />}
+          {alertColor === "Red" && <Image src="/icons/critical.svg" alt="Critical" width={3} height={3} />}
         </span>
         <span className="text-[13px] text-slate-500 font-medium">
           {client}
