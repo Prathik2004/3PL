@@ -13,6 +13,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
+    "dotenv": "^17.3.1",
+    "joi": "^18.0.2",
+    "mongoose": "^9.2.1",
+    "nodemon": "^3.1.13"
+  },
+  "devDependencies": {
+=======
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
     "joi": "^18.0.2",
@@ -22,12 +30,19 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.3.0",
+<<<<<<< HEAD
     "@types/node-cron": "^3.0.11",
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> bbd0ccaf3e2849c525a15a916a2723cca6ef0424
     "@types/nodemailer": "^7.0.11",
+>>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
     "csv-parser": "^3.2.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
