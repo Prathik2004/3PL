@@ -1,21 +1,15 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
-// Helper to get token (can be replaced with actual auth logic, e.g., getting from localStorage or cookies)
 export const getToken = (): string | null => {
   if (typeof window !== "undefined") {
-    // Replace with real logic if needed
-    return localStorage.getItem("token") || "mock_jwt_token";
+    // Check for both common keys just in case
+    return localStorage.getItem("accessToken") || localStorage.getItem("token") || null;
   }
   return null;
 };
 
-/**
- * Basic fetch wrapper to automatically add Authorization headers
- * and handle common JSON parsing and errors.
- */
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-
   const headers = new Headers(options.headers || {});
 
   if (token) {
@@ -35,14 +29,11 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     let errorMsg = "An error occurred while fetching data.";
     try {
       const errorData = await response.json();
-      errorMsg = errorData.message || JSON.stringify(errorData);
-    } catch {
-      // Ignore if parsing fails
-    }
+      errorMsg = errorData.error || errorData.message || JSON.stringify(errorData);
+    } catch { }
     throw new Error(errorMsg);
   }
 
-  // Handle 204 No Content
   if (response.status === 204) {
     return {} as T;
   }

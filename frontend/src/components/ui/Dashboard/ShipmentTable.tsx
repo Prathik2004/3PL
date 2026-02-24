@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Key, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow";
 import Pagination from "../Pagination";
 import { shipmentService } from "../../../services/shipmentService";
+import { JSX } from "react/jsx-runtime";
 
 const ShipmentTable = () => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
 
   // 1. Safely extract our Filter parameters from the URL
@@ -108,7 +112,7 @@ const ShipmentTable = () => {
             ) : displayShipments.length === 0 ? (
               <div className="flex justify-center items-center py-20 text-slate-400">No shipments found.</div>
             ) : (
-              displayShipments.map((shipment, idx) => (
+              displayShipments.map((shipment: JSX.IntrinsicAttributes & ShipmentRowProps, idx: Key | null | undefined) => (
                 <ShipmentRow key={idx} {...shipment} />
               ))
             )}
