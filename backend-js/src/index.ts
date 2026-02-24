@@ -11,6 +11,7 @@ import connectDB from "./config/database";
 import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
 import userRoutes from "./modules/User/UserRoutes";
+import cors from 'cors';
 dotenv.config();
 
 
@@ -19,6 +20,14 @@ import authRoutes from "./modules/auth/route";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+  origin: 'http://localhost:3001', // Allow only your frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
 
 // Middleware to parse incoming JSON payloads
 app.use(express.json());

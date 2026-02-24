@@ -20,4 +20,6 @@ router.put('/:id/status', authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), S
 
 router.delete('/:id', authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), ShipmentController.delete);
 
-export default router;
+router.put('/:id', authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), ShipmentController.updateStatus);
+
+router.get('/stats', authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), ShipmentController.getStats);export default router;

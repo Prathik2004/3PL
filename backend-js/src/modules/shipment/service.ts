@@ -5,6 +5,8 @@ import * as XLSX from 'xlsx';
 import { Shipment } from '../../models/shipment';
 import { ShipmentStatus, UserRole } from '../../types';
 import { createShipmentSchema } from './validator';
+import mongoose from 'mongoose';
+import Exception from '../../models/Exception.model';
 
 export class ShipmentService {
 
@@ -85,14 +87,34 @@ export class ShipmentService {
         if (filters.status) query.status = filters.status;
         if (filters.client) query.client_name = { $regex: filters.client, $options: 'i' };
 
-        const [data, total] = await Promise.all([
+        // 1. Fetch Shipments
+        const [shipments, total] = await Promise.all([
             Shipment.find(query)
                 .sort({ created_at: -1 })
                 .skip(skip)
                 .limit(limit)
-                .populate('creator_details', 'name email'), // Join with User table
+                .populate('creator_details', 'name email')
+                .lean(),
             Shipment.countDocuments(query)
         ]);
+
+        // 2. Fetch corresponding Exceptions for these shipments
+        const shipmentIds = shipments.map(s => s._id);
+        const activeExceptions = await Exception.find({
+            shipment_id: { $in: shipmentIds },
+            resolved: false
+        }).lean();
+
+        // 3. Attach exceptions to the shipment objects manually
+        const data = shipments.map(shipment => {
+            return {
+                ...shipment,
+                // Find the first unresolved exception for this specific shipment
+                active_exception: activeExceptions.find(
+                    ex => ex.shipment_id.toString() === shipment._id.toString()
+                ) || null
+            };
+        });
 
         return { total, page, limit, data };
     }
@@ -145,7 +167,7 @@ export class ShipmentService {
             .sort({ created_at: -1 })
             .populate('creator_details', 'name')
             .lean();
-        
+
         const exportData = shipments.map((s: any) => ({
             'Shipment ID': s.shipment_id,
             'Client Name': s.client_name,
@@ -168,4 +190,49 @@ export class ShipmentService {
             return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
         }
     }
+
+    static async getDashboardStats(userId: string, userRole: string) {
+        const query: any = { status: { $ne: ShipmentStatus.CANCELLED } };
+
+        if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
+            query.created_by = userId;
+        }
+
+        const stats = await Shipment.aggregate([
+            { $match: query },
+            {
+                $facet: {
+                    active: [{ $count: "count" }],
+                    delivered: [{ $match: { status: ShipmentStatus.DELIVERED } }, { $count: "count" }],
+                    delayed: [{ $match: { status: ShipmentStatus.DELAYED } }, { $count: "count" }],
+                    onTime: [
+                        {
+                            $match: {
+                                status: ShipmentStatus.DELIVERED,
+                                $expr: { $lte: ["$delivered_date", "$expected_delivery_date"] }
+                            }
+                        },
+                        { $count: "count" }
+                    ]
+                }
+            }
+        ]);
+
+        const exceptionCount = await Exception.countDocuments({ resolved: false });
+
+        const result = stats[0];
+        const delivered = result.delivered[0]?.count || 0;
+        const onTime = result.onTime[0]?.count || 0;
+        const onTimePercent = delivered > 0 ? ((onTime / delivered) * 100).toFixed(1) : "100";
+
+        return {
+            activeShipments: result.active[0]?.count || 0,
+            delivered: delivered,
+            exceptions: exceptionCount,
+            delayed: result.delayed[0]?.count || 0,
+            onTimePercent: `${onTimePercent}%`
+        };
+    }
 }
+
+// Inside ShipmentService class

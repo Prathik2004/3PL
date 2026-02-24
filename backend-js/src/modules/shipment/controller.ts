@@ -94,4 +94,15 @@ export class ShipmentController {
       return res.status(500).json({ error: error.message });
     }
   }
+
+  static async getStats(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user?.id;
+            const userRole = (req as any).user?.role;
+            const stats = await ShipmentService.getDashboardStats(userId, userRole);
+            return res.status(200).json(stats);
+        } catch (error: any) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }
