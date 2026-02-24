@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
+import { RequestHandler } from "express";
 import mongoose from "mongoose";
 import Exception from "../../models/Exception.model";
+import { resolveExceptionService } from "../../cron/resolveException";
 
+
+interface ResolveParams {
+  id: string;
+}
 /**
  * GET All Exceptions
  * Query: ?resolved=true/false
@@ -68,27 +74,15 @@ export const getExceptionsByShipment = async (req: Request, res: Response) => {
 /**
  * PUT Resolve Exception
  */
-export const resolveException = async (req: Request, res: Response) => {
+export const resolveException: RequestHandler = async (req, res) => {
   try {
-    let { id } = req.params;
+     const { id } = req.params as { id: string };
+     const { resolution_note } = req.body as { resolution_note?: string };
 
-    if (Array.isArray(id)) id = id[0];
-
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid exception ID" });
-    }
-
-    const exception = await Exception.findByIdAndUpdate(
-      id,
-      { resolved: true },
-      { new: true },
-    );
-
-    if (!exception) {
-      return res.status(404).json({ error: "Exception not found" });
-    }
+    const exception = await resolveExceptionService(id, resolution_note);
 
     return res.status(200).json({
+      success: true,
       message: "Exception resolved successfully",
       data: exception,
     });
