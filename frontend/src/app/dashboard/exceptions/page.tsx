@@ -28,24 +28,28 @@ export default function ExceptionsDashboard() {
           value={8}
           status="alert"
           iconSrc="/icons/logs.svg"
+          variant="exception"
         />
         <KpiCard
           title="Missing POD"
           value={12}
           status="alert"
           iconSrc="/icons/file.svg"
+          variant="exception"
         />
         <KpiCard
           title="Critical Delay"
           value={3}
           status="critical"
           iconSrc="/icons/delayed.svg"
+          variant="exception"
         />
         <KpiCard
           title="Not Dispatched"
           value={1}
           status="neutral"
           iconSrc="/icons/Container.svg"
+          variant="exception"
         />
       </div>
 
