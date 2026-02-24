@@ -8,7 +8,6 @@ out/
 build/
 
 # Backend folders (Specific to your 4-team collaboration)
-/frontend
 /backend-php
 /backend-python
 

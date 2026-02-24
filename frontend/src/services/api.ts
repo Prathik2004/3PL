@@ -1,6 +1,3 @@
- // src/services/api.ts
-
-// Simulated environment variable for base URL or default
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 // Helper to get token (can be replaced with actual auth logic, e.g., getting from localStorage or cookies)
