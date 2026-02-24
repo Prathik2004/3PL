@@ -19,3 +19,5 @@ export interface ShipmentRowProps{
 export interface ModalProps{
     onClose: ()=> void
 }
+
+export type Roles="Viewer" | "Operations" | "Admin";
