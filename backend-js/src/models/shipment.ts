@@ -26,7 +26,7 @@ export interface IShipment extends Document {
   pod_received: boolean;
   created_at: Date;
   updated_at: Date;
-  created_by: string; 
+  created_by: Types.ObjectId; 
 }
 
 const ShipmentSchema: Schema = new Schema(
