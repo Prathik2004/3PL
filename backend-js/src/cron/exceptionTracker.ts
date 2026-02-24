@@ -14,7 +14,7 @@ const runExceptionTracker = (): void => {
 
       // Populate 'created_by' so we can access email
       const shipments = await Shipment.find({
-        status: { $ne: "Cancelled" },
+        status: { $nin: ["Delivered", "Cancelled"] },
       }).populate<{ created_by: IUser }>("created_by");
 
       const now = new Date();
@@ -23,12 +23,12 @@ const runExceptionTracker = (): void => {
         // Convert Mongoose doc to plain object with correct type
         const s: ShipmentPopulated = shipment.toObject();
 
-        // 🔹 Delay
+        //  Delay
         if (s.status !== "Delivered" && now > s.expected_delivery_date) {
           await createException(s, "Delay", "Shipment delayed");
         }
 
-        // 🔹 No Update (24 hrs)
+        // No Update (24 hrs)
         const hoursSinceUpdate =
           (now.getTime() - s.last_status_update.getTime()) / (1000 * 60 * 60);
 
@@ -36,12 +36,12 @@ const runExceptionTracker = (): void => {
           await createException(s, "NoUpdate", "No status update in 24 hours");
         }
 
-        // 🔹 Missing POD
+        //  Missing POD
         if (s.status === "Delivered" && s.pod_received === false) {
           await createException(s, "MissingPOD", "POD not received");
         }
 
-        // 🔹 Not Dispatched (48 hrs)
+        //  Not Dispatched (48 hrs)
         const hoursSinceCreated =
           (now.getTime() - s.created_at.getTime()) / (1000 * 60 * 60);
 
@@ -59,7 +59,7 @@ const runExceptionTracker = (): void => {
   });
 };
 
-// 🔹 Use ShipmentPopulated here as well
+//  Use ShipmentPopulated here as well
 const createException = async (
   shipment: ShipmentPopulated,
   type: "Delay" | "NoUpdate" | "MissingPOD" | "NotDispatched",
@@ -92,14 +92,12 @@ const createException = async (
           <p><b>Description:</b> ${message}</p>
         `,
       });
-      console.log(`✅ Email sent to ${shipment.created_by.email}`);
+      console.log(`Email sent to ${shipment.created_by.email}`);
     } else {
-      console.warn("⚠️ Shipment has no user email. Cannot send notification.");
+      console.warn("Shipment1 has no user email. Cannot send notification.");
     }
   } else {
-    console.log(
-      `⚠️ Already Exists → ${type} | Shipment: ${shipment.shipment_id}`,
-    );
+    console.log(`Already Exists → ${type} | Shipment: ${shipment.shipment_id}`);
   }
 };
 
