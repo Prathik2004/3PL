@@ -16,8 +16,7 @@ export const createUserByAdmin = async (
   const existing = await User.findOne({ email });
   if (existing) throw new Error("User already exists");
 
-  const randomInitialPassword = crypto.randomBytes(16).toString("hex");
-  const hashedPassword = await bcrypt.hash(randomInitialPassword, 10);
+  const hashedPassword = await bcrypt.hash(crypto.randomBytes(16).toString("hex"), 10);
   const resetToken = generateShortToken();
 
   const user = await User.create({
@@ -126,8 +125,8 @@ export const resetPassword = async (
 
   user.password_hash = await bcrypt.hash(newPassword, 10);
   user.mustResetPassword = false;
-  user.resetToken = undefined;
-  user.resetTokenExpiry = undefined;
+  (user as any).resetToken = null;
+  (user as any).resetTokenExpiry = null;
 
   await user.save();
 };
@@ -152,12 +151,12 @@ export const loginUser = async (email: string, password: string) => {
   );
 
   const refreshToken = jwt.sign(
-    { id: user.userId },
+    { id: (user as any).userId },
     process.env.JWT_REFRESH_SECRET as string,
     { expiresIn: "7d" }
   );
 
-  user.refreshToken = refreshToken;
+  (user as any).refreshToken = refreshToken;
   await user.save();
 
   return { accessToken, refreshToken };

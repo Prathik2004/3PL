@@ -45,6 +45,6 @@ export const validate = (schema: z.ZodSchema) => (req: Request, res: Response, n
         });
         next();
     } catch (error: any) {
-        return res.status(400).json({ error: error.errors });
+        res.status(400).json({ error: error.errors });
     }
 };

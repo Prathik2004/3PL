@@ -62,9 +62,9 @@ export const login = async (req: Request, res: Response) => {
 };
 export const logout = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findOne({ userId: req.user?.id });
+    const user = await User.findOne({ userId: req.user?.id } as any);
     if (user) {
-      user.refreshToken = undefined;
+      (user as any).refreshToken = null;
       await user.save();
     }
     res.json({ message: "Logged out successfully" });
