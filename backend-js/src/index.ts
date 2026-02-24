@@ -11,12 +11,16 @@ import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
 import userRoutes from "./modules/User/UserRoutes";
 dotenv.config();
-
-
+import cors from "cors";
 import authRoutes from "./modules/auth/route";
 
-
 const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:3001', // Adjust this to your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 const PORT = process.env.PORT || 3000;
 
 // Middleware to parse incoming JSON payloads

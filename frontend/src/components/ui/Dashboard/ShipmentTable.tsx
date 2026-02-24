@@ -1,189 +1,98 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShipmentRowProps } from "@/src/types/types";
-import ShipmentRow from "./ShipmentRow"
+import ShipmentRow from "./ShipmentRow";
 import Pagination from "../Pagination";
-
-export const shipments: ShipmentRowProps[] = [
-  {
-    shipmentId: "#SHP-98231",
-    client: "Alpha Retail Solutions",
-    lastUpdated: "3hrs",
-    carrier: "FedEx Ground",
-    dest: "Austin, TX",
-    expDel: "24/10 14:00",
-    alert: "-",
-    alertColor: "None",
-    status: "IN TRANSIT",
-  },
-  {
-    shipmentId: "#SHP-98245",
-    client: "Zion Logistics Group",
-    lastUpdated: "52hrs",
-    carrier: "UPS Express",
-    dest: "Chicago, IL",
-    expDel: "24/10 14:00",
-    alert: "NO UPDATE",
-    alertColor: "Yellow",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98250",
-    client: "Metro Food Dist.",
-    lastUpdated: "1hr",
-    carrier: "DHL Global",
-    dest: "Seattle, WA",
-    expDel: "25/10 10:00",
-    alert: "-",
-    alertColor: "None",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98255",
-    client: "Summit Outfitter",
-    lastUpdated: "4hrs",
-    carrier: "FedEx Ground",
-    dest: "New York, NY",
-    expDel: "22/10 16:45",
-    alert: "MISSING POD",
-    alertColor: "Yellow",
-    status: "DELIVERED",
-  },
-  {
-    shipmentId: "#SHP-98260",
-    client: "Global Tech Parts",
-    lastUpdated: "1hr",
-    carrier: "Regional Xpress",
-    dest: "Denver, CO",
-    expDel: "21/10 09:00",
-    alert: "CRITICAL DELAY",
-    alertColor: "Red",
-    status: "DELAYED",
-  },
-  {
-    shipmentId: "#SHP-98231",
-    client: "Alpha Retail Solutions",
-    lastUpdated: "3hrs",
-    carrier: "FedEx Ground",
-    dest: "Austin, TX",
-    expDel: "24/10 14:00",
-    alert: "-",
-    alertColor: "None",
-    status: "IN TRANSIT",
-  },
-  {
-    shipmentId: "#SHP-98245",
-    client: "Zion Logistics Group",
-    lastUpdated: "52hrs",
-    carrier: "UPS Express",
-    dest: "Chicago, IL",
-    expDel: "24/10 14:00",
-    alert: "NO UPDATE",
-    alertColor: "Yellow",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98250",
-    client: "Metro Food Dist.",
-    lastUpdated: "1hr",
-    carrier: "DHL Global",
-    dest: "Seattle, WA",
-    expDel: "25/10 10:00",
-    alert: "-",
-    alertColor: "None",
-    status: "DISPATCHED",
-  },
-  {
-    shipmentId: "#SHP-98255",
-    client: "Summit Outfitter",
-    lastUpdated: "4hrs",
-    carrier: "FedEx Ground",
-    dest: "New York, NY",
-    expDel: "22/10 16:45",
-    alert: "MISSING POD",
-    alertColor: "Yellow",
-    status: "DELIVERED",
-  },
-  {
-    shipmentId: "#SHP-98260",
-    client: "Global Tech Parts",
-    lastUpdated: "1hr",
-    carrier: "Regional Xpress",
-    dest: "Denver, CO",
-    expDel: "21/10 09:00",
-    alert: "CRITICAL DELAY",
-    alertColor: "Red",
-    status: "DELAYED",
-  },
-];
+import { shipmentService } from "../../../services/shipmentService";
 
 const ShipmentTable = () => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 1. Safely extract our Filter parameters from the URL
+  // State for backend data
+  const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Extract Filter parameters from the URL
   const currentStatus = searchParams.get('status') || 'all';
-  const currentCarrier = searchParams.get('carrier') || 'all';
   const currentClient = searchParams.get('client') || 'all';
-  const currentException = searchParams.get('exceptions') || 'all';
+  // Note: currentCarrier and currentException can be added to the filters object 
+  // if your backend getAllShipments supports them.
 
-  // 2. Perform Filtering logic locally over dummy data (to simulate backend DB query)
-  const filteredShipments = useMemo(() => {
-    // Repeat dummy data twice just for volume like you had
-    const allShipments = [...shipments, ...shipments];
+  useEffect(() => {
+    const fetchShipments = async () => {
+      setIsLoading(true);
+      try {
+        // 1. Prepare Backend Filters
+        const filters: Record<string, string> = {};
+        if (currentStatus !== 'all') filters.status = currentStatus;
+        if (currentClient !== 'all') filters.client = currentClient;
 
-    return allShipments.filter((shipment) => {
-      // Normalize helpers
-      const normalize = (str: string | null) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      
-      // Status Match
-      let matchesStatus = true;
-      if (currentStatus && currentStatus.toLowerCase() !== 'all') {
-         const s = normalize(shipment.status);
-         const t = normalize(currentStatus);
-         matchesStatus = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
+        // 2. Call the Service (This hits your backend manual-join logic)
+        const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, filters);
+
+        // 3. Map Backend Data to Frontend Row Props (Keeping your Alert Logic)
+        const mapped: ShipmentRowProps[] = (res.data || []).map((s: any) => {
+          let alert = "-";
+          let alertColor: "Red" | "Yellow" | "None" = "None";
+
+          // Alert logic using the manually joined Exception data
+          if (s.active_exception) {
+            alert = s.active_exception.exception_type.toUpperCase();
+            alertColor = "Red";
+          } else if (s.status === "Delayed") {
+            alert = "DELAYED";
+            alertColor = "Red";
+          } else if (!s.pod_received && s.status === "Delivered") {
+            alert = "MISSING POD";
+            alertColor = "Yellow";
+          }
+
+          return {
+            shipmentId: s.shipment_id, // Mapping DB field to UI prop
+            client: s.client_name,
+            lastUpdated: s.updated_at ? formatTimeAgo(s.updated_at) : "-",
+            carrier: s.carrier_name,
+            dest: s.destination,
+            expDel: s.expected_delivery_date 
+              ? new Date(s.expected_delivery_date).toLocaleDateString() 
+              : "N/A",
+            alert,
+            alertColor,
+            status: s.status,
+          };
+        });
+
+        setDisplayShipments(mapped);
+        setTotalItems(res.total || 0);
+      } catch (err) {
+        console.error("Failed to fetch shipments:", err);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Carrier Partial Match
-      let matchesCarrier = true;
-      if (currentCarrier && currentCarrier.toLowerCase() !== 'all') {
-         matchesCarrier = (shipment.carrier || '').toLowerCase().includes(currentCarrier.toLowerCase());
-      }
+    fetchShipments();
+  }, [currentPage, currentStatus, currentClient]);
 
-      // Client Partial Match
-      let matchesClient = true;
-      if (currentClient && currentClient.toLowerCase() !== 'all') {
-         matchesClient = (shipment.client || '').toLowerCase().includes(currentClient.toLowerCase());
-      }
+  // Helper function for "Time Ago" display
+  function formatTimeAgo(dateString: string) {
+    const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    return `${Math.floor(seconds / 86400)}d`;
+  }
 
-      // Exception Exact Match
-      let matchesException = true;
-      if (currentException && currentException.toLowerCase() !== 'all') {
-         const s = normalize(shipment.alert);
-         const t = normalize(currentException);
-         matchesException = s === t || (s !== '' && t !== '' && (s.includes(t) || t.includes(s)));
-      }
-
-      return matchesStatus && matchesCarrier && matchesClient && matchesException;
-    });
-  }, [currentStatus, currentCarrier, currentClient, currentException]);
-
-  // 3. Dynamic Pagination based on filtered results
-  const totalItems = filteredShipments.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
   const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
 
-  // 4. Finally slice precisely what to render
-  const displayShipments = filteredShipments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   return (
     <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">
-      {/* Scrollable Container */}
       <div className="overflow-x-auto w-full">
         <div className="min-w-[1100px] w-full">
           {/* TABLE HEADER */}
@@ -198,21 +107,16 @@ const ShipmentTable = () => {
           </div>
 
           {/* TABLE CONTENT */}
-          <div className="w-full flex flex-col">
-            {displayShipments?.map((shipment, idx) => (
-              <ShipmentRow
-                key={idx}
-                shipmentId={shipment.shipmentId}
-                client={shipment.client}
-                expDel={shipment.expDel}
-                lastUpdated={shipment.lastUpdated}
-                carrier={shipment.carrier}
-                dest={shipment.dest}
-                alert={shipment.alert}
-                alertColor={shipment.alertColor}
-                status={shipment.status}
-              />
-            ))}
+          <div className="w-full flex flex-col min-h-[400px]">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20 text-slate-400">Loading shipments...</div>
+            ) : displayShipments.length === 0 ? (
+              <div className="flex justify-center items-center py-20 text-slate-400">No shipments found.</div>
+            ) : (
+              displayShipments.map((shipment, idx) => (
+                <ShipmentRow key={idx} {...shipment} />
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -233,9 +137,7 @@ const ShipmentTable = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-
-export default ShipmentTable
-
+export default ShipmentTable;

@@ -11,27 +11,29 @@ const router = Router();
 router.post('/upload', upload.single('file'), ShipmentController.uploadCSV);
 
 // Viewer, Operations, and Admin can read shipments 
-router.get('/', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), 
-  ShipmentController.getAll
+router.get('/',
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getAll
 );
 
 // Only Operations and Admin can create shipments 
-router.post('/', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.create
+router.post('/',
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    ShipmentController.create
 );
 
 // Only Operations and Admin can update shipments
-router.put('/:id/status', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.updateStatus
+router.put('/:id/status',
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    ShipmentController.updateStatus
 );
 
 // Soft delete (Cancel) - Only Operations and Admin
-router.delete('/:id', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.delete
+router.delete('/:id',
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    ShipmentController.delete
 );
-
+router.get('/stats',
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getStats);
 export default router;
