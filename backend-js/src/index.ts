@@ -1,3 +1,4 @@
+import "regenerator-runtime/runtime";
 import dns from "dns";
 dns.setServers(["1.1.1.1"]);
 
