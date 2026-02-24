@@ -1,12 +1,12 @@
 "use client"
 
 import React from "react"
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  eachDayOfInterval, 
-  getDay 
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  getDay
 } from "date-fns"
 
 const DAYS_HEADER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -14,11 +14,11 @@ const DAYS_HEADER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 // Mock intensity data logic
 const getIntensityClass = (level: number) => {
   const levels: Record<number, string> = {
-    1: "bg-[#F1F5F9]", 
+    1: "bg-[#F1F5F9]",
     2: "bg-[#DBEAFE]",
     3: "bg-[#93C5FD]",
     4: "bg-[#3B82F6]",
-    5: "bg-[#1D4ED8]", 
+    5: "bg-[#1D4ED8]",
   }
   return levels[level] || "bg-[#F8FAFC]"
 }
@@ -31,8 +31,8 @@ export function MonthlyExceptionHeatmap({ targetDate = new Date() }: { targetDat
   // 2. Generate exactly the number of days in that month (30, 31, etc.)
   const daysInMonth = eachDayOfInterval({ start, end }).map(date => ({
     date,
-    // This weight would eventually come from your Exception Table (Section 10.2)
-    weight: Math.floor(Math.random() * 5) + 1 
+    // Use a deterministic value based on the date to avoid hydration mismatch
+    weight: ((date.getDate() * 7) % 5) + 1
   }))
 
   // 3. Calculate offset for the first day of the week
@@ -79,7 +79,7 @@ export function MonthlyExceptionHeatmap({ targetDate = new Date() }: { targetDat
             <span className={`text-[12px] font-semibold ${entry.weight > 3 ? 'text-white' : 'text-[#64748B]'}`}>
               {format(entry.date, 'd')}
             </span>
-            
+
             <div className="absolute bottom-full mb-2 hidden group-hover:block bg-[#0F172A] text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10">
               {entry.weight} Exceptions on {format(entry.date, 'MMM do')}
             </div>

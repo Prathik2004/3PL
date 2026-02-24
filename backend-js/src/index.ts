@@ -52,4 +52,18 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running successfully on http://localhost:${PORT}`);
+  console.log(`Health check available at http://localhost:${PORT}/health`);
 });
+
+const startServer = async () => {
+  await connectDB();
+
+  // Start cron AFTER DB connected
+  runExceptionTracker();
+
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+};
+
+startServer();

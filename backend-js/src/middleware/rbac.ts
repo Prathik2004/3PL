@@ -6,7 +6,9 @@ export const authorizeRoles = (...allowedRoles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // req.user is now populated by the 'authenticate' middleware
     const user = (req as any).user; 
-
+    console.log(
+      `RBAC Check - User Role: ${user?.role}, Allowed Roles: ${allowedRoles}`,
+    );
     if (!user || !allowedRoles.includes(user.role)) {
       console.log(`Access Denied. User Role: ${user?.role}. Required: ${allowedRoles}`);
       return res.status(403).json({ 

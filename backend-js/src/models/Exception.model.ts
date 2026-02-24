@@ -7,6 +7,8 @@ export interface IException extends Document {
   resolved: boolean;
   createdAt: Date;
   updatedAt: Date;
+  resolved_at: Date; // when resolved
+  resolution_note: string; // optional note on resolution
 }
 
 const ExceptionSchema: Schema = new Schema(
@@ -23,6 +25,8 @@ const ExceptionSchema: Schema = new Schema(
     },
     description: { type: String, required: true },
     resolved: { type: Boolean, default: false },
+    resolved_at: { type: Date }, // when resolved
+    resolution_note: { type: String }, // optional note on resolution
   },
   { timestamps: true },
 );
