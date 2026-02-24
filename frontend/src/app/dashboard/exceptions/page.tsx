@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import KpiCard from "@/src/components/common/KPICard";
+import ExceptionCard from "@/src/components/ui/Dashboard/ExceptionCard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 import { FilterBar } from "@/src/components/common/FilterBar";
+import { RefreshCwOff, FileText, CalendarX, ClipboardList } from "lucide-react";
 
 export const metadata = {
   title: "Exceptions Dashboard | Walkwel 3PL",
@@ -23,33 +24,29 @@ export default function ExceptionsDashboard() {
 
       {/* KPI Summary Cards */}
       <div className="flex flex-nowrap lg:flex-row gap-4 overflow-x-auto pb-4 lg:pb-0">
-        <KpiCard
+        <ExceptionCard
           title="No Update"
-          value={8}
-          status="alert"
-          iconSrc="/icons/logs.svg"
-          variant="exception"
+          count={8}
+          severity="warning"
+          icon={RefreshCwOff}
         />
-        <KpiCard
+        <ExceptionCard
           title="Missing POD"
-          value={12}
-          status="alert"
-          iconSrc="/icons/file.svg"
-          variant="exception"
+          count={12}
+          severity="warning"
+          icon={FileText}
         />
-        <KpiCard
+        <ExceptionCard
           title="Critical Delay"
-          value={3}
-          status="critical"
-          iconSrc="/icons/delayed.svg"
-          variant="exception"
+          count={3}
+          severity="critical"
+          icon={CalendarX}
         />
-        <KpiCard
+        <ExceptionCard
           title="Not Dispatched"
-          value={1}
-          status="neutral"
-          iconSrc="/icons/Container.svg"
-          variant="exception"
+          count={1}
+          severity="neutral"
+          icon={ClipboardList}
         />
       </div>
 
@@ -69,3 +66,4 @@ export default function ExceptionsDashboard() {
     </div>
   );
 }
+
