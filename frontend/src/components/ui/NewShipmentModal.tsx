@@ -4,16 +4,32 @@ import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
 import { ModalProps } from "@/src/types/types"
 import { motion } from "motion/react"
+import { useEffect } from "react"
 
 const NewShipmentModal = ({onClose}: ModalProps) => {
+
+    useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+
+    // cleanup to avoid memory leaks
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
   return (
-    <div 
+    <div onClick={onClose}
     // ref={scope}
     style={{
       fontFamily: "Inter"
     }} 
     className="w-full rounded-xl border border-[#E2E8F0] fixed inset-0 flex md:items-center justify-center bg-black/30 backdrop-blur-sm overflow-y-auto">
-      <motion.div
+      <motion.div onClick={(e) => e.stopPropagation()}
       initial={{
         opacity:0,
         filter: "blur(10px)",

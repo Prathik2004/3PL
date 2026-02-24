@@ -3,48 +3,58 @@ import Image from "next/image"
 import BasicButton from "./BasicButton"
 import { ModalProps } from "@/src/types/types"
 import { useEffect } from "react"
-import { motion, useAnimate } from "motion/react"
+import { motion } from "motion/react"
 
 
 
 const BulkUploadModal = ({onClose}: ModalProps) => {
+
+  // CLOSING MODAL WHEN esc IS HIT
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+
+    // cleanup to avoid memory leaks
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
   
-  const [scope, animate]=useAnimate();
-  useEffect(()=> {
-    animate(".box", {
-      opacity:1,
-      filter: "blur(0px)",
-      scale: [1.5, 1],
-    }, {
-      duration:0.5,
-      ease: "easeInOut",
-      type: "spring"
-    })
-  }, [])
-
-  const exitAnimation = async()=>{
-    await animate(".box", {
-      opacity:0,
-      filter:"blur(10px)",
-      scale: 0
-    }, {
-      duration:0.5,
-      ease: "easeIn"
-    })
-
-    onClose()
-  }
-
   return (
-    <div ref={scope}
+    <div onClick={onClose}
     className="fixed inset-0 flex md:items-center justify-center bg-black/30 backdrop-blur-sm">
         {/* MODAL */}
-      <motion.div 
+      <motion.div onClick={(e) => e.stopPropagation()}
       style={{
         fontFamily: "Inter",
         opacity: 0,
         filter:"blur(10px)"
         }} 
+        initial={{
+        opacity:0,
+        filter: "blur(10px)",
+        scale:1
+      }} 
+      animate={{
+        opacity:1,
+        filter: "blur(0px)",
+        scale: [1.5, 1]
+      }}
+      exit={{
+        opacity:0,
+        scale:0,
+        filter: "blur(10px)"
+      }}
+      transition={{
+        type: "spring",
+        duration:0.5,
+        ease: "easeInOut"
+      }}
       className="md:w-130 p-8 flex flex-col items-center justify-center bg-white border border-[#E2E8F0] rounded-xl gap-2 box">
         {/* ICON */}
         <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#F5F9FF]">
@@ -84,10 +94,8 @@ const BulkUploadModal = ({onClose}: ModalProps) => {
         </label>
         {/* ACTION BUTTONS */}
         <div className="flex items-center justify-center gap-2">
-            <BasicButton onClick={()=>{
-              exitAnimation()
-            }}  text="Cancel" className="" />
-            <BasicButton text="Upload and Process" className="bg-black text-white py-4 px-4 rounded-lg cursor-pointer text-sm md:text-base" />
+            <BasicButton onClick={onClose}  text="Cancel" className="" />
+            <BasicButton onClick={onClose} text="Upload and Process" className="bg-black text-white py-4 px-4 rounded-lg cursor-pointer text-sm md:text-base" />
         </div>
       </motion.div>
     </div>

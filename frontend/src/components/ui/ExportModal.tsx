@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BasicButton from './BasicButton';
 import { motion } from "motion/react"
 
@@ -9,11 +9,27 @@ export interface ExportModalProps {
 }
 
 export const ExportModal = ({ onClose, onExport }: ExportModalProps) => {
+
+  useEffect(() => {
+      const handleEsc = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          onClose?.();
+        }
+      };
+  
+      window.addEventListener("keydown", handleEsc);
+  
+      // cleanup to avoid memory leaks
+      return () => {
+        window.removeEventListener("keydown", handleEsc);
+      };
+    }, [onClose]);
+
   const [format, setFormat] = useState<'csv' | 'excel'>('csv');
 
   return (
-    <div className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-100'>
-    <motion.div 
+    <div onClick={onClose} className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-100'>
+    <motion.div onClick={(e) => e.stopPropagation()}
     initial={{
         opacity:0,
         filter: "blur(10px)",

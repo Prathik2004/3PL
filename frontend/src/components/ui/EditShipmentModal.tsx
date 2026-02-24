@@ -1,7 +1,9 @@
+"use client"
 import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
-import { ModalProps } from "@/src/types/types";
+import { motion } from "motion/react";
+import { useEffect } from "react";
 
 interface EditShipmentModalProps{
     shipmentId?: string;
@@ -16,20 +18,56 @@ interface EditShipmentModalProps{
 }
 
 const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, dispatchDate, expDelivery, onClose}: EditShipmentModalProps) => {
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+
+    // cleanup to avoid memory leaks
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
   return (
-    <div
+    <div onClick={onClose}
     style={{
       fontFamily: "Inter"
     }} 
     className="w-full rounded-xl border border-[#E2E8F0] fixed inset-0 flex md:items-center justify-center bg-black/30 backdrop-blur-sm overflow-y-auto">
-      <div className="flex flex-col">
+      <motion.div onClick={(e) => e.stopPropagation()}
+      initial={{
+        opacity:0,
+        filter: "blur(10px)",
+        scale:1
+      }} 
+      animate={{
+        opacity:1,
+        filter: "blur(0px)",
+        scale: [1.5, 1]
+      }}
+      exit={{
+        opacity:0,
+        scale:0,
+        filter: "blur(10px)"
+      }}
+      transition={{
+        type: "spring",
+        duration:0.5,
+        ease: "easeInOut"
+      }}
+      className="flex flex-col">
       {/* HEADER */}
       <div className="bg-[#E2E8F0] py-5 px-8 rounded-t-xl flex items-center justify-between">
       <div className="w-[70%]  flex flex-col ">
         <span className="text-[22px]/[28px] font-bold">Edit Shipment {shipmentId} </span>
         <span className="text-[12px] text-[#64748B]">Update logistics details and status history.</span>
       </div>
-      <button className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
+      <button onClick={onClose} className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
         <Image src="icons/cross.svg" alt="close" width={10} height={10} />
       </button>
       </div>
@@ -71,7 +109,7 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
         <BasicButton className="bg-black text-white py-2 px-4 rounded-lg cursor-pointer" text="Create Shipment" />
       </div>
     </div>
-    </div>
+    </motion.div>
     </div>
   )
 }
