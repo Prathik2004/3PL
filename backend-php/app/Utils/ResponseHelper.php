@@ -20,11 +20,15 @@ class ResponseHelper
 
     public static function error(
         string|array $message = 'Something went wrong',
-        int $code = 400
+        mixed $code = 400
     ): JsonResponse {
         if (is_array($message)) {
             $firstError = collect($message)->flatten()->first();
-            $message = 'Validation Failed Due to ' . $firstError;
+            $message = 'Failed Due to ' . $firstError;
+        }
+
+        if (!is_int($code) || $code < 100 || $code > 599) {
+            $code = 500;
         }
 
         return response()->json([

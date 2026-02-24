@@ -32,28 +32,35 @@ return Application::configure(basePath: dirname(__DIR__))
             // Only format API routes
             if ($request->is('api/*') || $request->expectsJson()) {
 
-                // Validation Errors
-                if ($e instanceof ValidationException) {
-                    return ResponseHelper::error($e->errors(), 422);
-                }
+                try {
+                    // Validation Errors
+                    if ($e instanceof ValidationException) {
+                        return ResponseHelper::error($e->errors(), 422);
+                    }
 
-                // 404
-                if ($e instanceof NotFoundHttpException) {
-                    return ResponseHelper::error('API route not found', 404);
-                }
+                    // 404
+                    if ($e instanceof NotFoundHttpException) {
+                        return ResponseHelper::error('API route not found', 404);
+                    }
 
-                // 401
-                if ($e instanceof UnauthorizedHttpException) {
-                    return ResponseHelper::error('Unauthorized', 401);
-                }
+                    // 401
+                    if ($e instanceof UnauthorizedHttpException) {
+                        return ResponseHelper::error('Unauthorized', 401);
+                    }
 
-                // Default 500
-                return ResponseHelper::error(
-                    config('app.debug')
-                        ? $e->getMessage()
-                        : 'Internal Server Error',
-                    500
-                );
+                    // Default 500
+                    return ResponseHelper::error(
+                        config('app.debug')
+                            ? $e->getMessage()
+                            : 'Internal Server Error',
+                        500
+                    );
+                } catch (\Throwable $t) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => config('app.debug') ? $e->getMessage() : 'Internal Server Error',
+                    ], 500);
+                }
             }
             return null;
         });
