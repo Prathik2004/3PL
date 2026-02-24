@@ -119,7 +119,7 @@ export const shipments: ShipmentRowProps[] = [
   },
 ];
 
-const ShipmentTable = () => {
+const ShipmentTable = ({ onlyExceptions = false }: { onlyExceptions?: boolean }) => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -136,6 +136,11 @@ const ShipmentTable = () => {
     const allShipments = [...shipments, ...shipments];
 
     return allShipments.filter((shipment) => {
+      // If we only want exceptions, filter out anything where alert is "-" or empty
+      if (onlyExceptions && (!shipment.alert || shipment.alert === '-')) {
+        return false;
+      }
+
       // Normalize helpers
       const normalize = (str: string | null) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       
@@ -169,7 +174,7 @@ const ShipmentTable = () => {
 
       return matchesStatus && matchesCarrier && matchesClient && matchesException;
     });
-  }, [currentStatus, currentCarrier, currentClient, currentException]);
+  }, [currentStatus, currentCarrier, currentClient, currentException, onlyExceptions]);
 
   // 3. Dynamic Pagination based on filtered results
   const totalItems = filteredShipments.length;

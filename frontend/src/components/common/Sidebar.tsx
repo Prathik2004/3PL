@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 const NAV_ITEMS = [
   { label: 'Overview', href: '/dashboard', icon: '/icons/dashboard.svg' },
   { label: 'Analytics', href: '/analytics', icon: '/icons/analytics.svg' },
-  { label: 'Exceptions', href: '/exceptions', icon: '/icons/exceptions.svg' },
+  { label: 'Exceptions', href: '/dashboard/exceptions', icon: '/icons/exceptions.svg' },
   { label: 'Logs', href: '/logs', icon: '/icons/logs.svg' },
 ];
 
