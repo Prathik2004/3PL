@@ -1,53 +1,7 @@
 'use client';
 
-import React, { useTransition, useCallback } from'react';
-import { useRouter, usePathname, useSearchParams } from'next/navigation';
-
-
-// --- TYPES ---
-import { FilterState, FilterSortStatus, FilterCarrier } from'@/src/types/filter.types';
-
-// --- HOOK ---
-import { STATUS_OPTIONS } from'@/src/constants/filters';
-export const useFilters = () => {
- const router = useRouter();
- const pathname = usePathname();
- const searchParams = useSearchParams();
- const [isPending, startTransition] = useTransition();
-
- const filters: FilterState = {
- status: (searchParams.get('status') as FilterSortStatus) ||'all',
- carrier: (searchParams.get('carrier') as FilterCarrier) ||'all',
- client: searchParams.get('client') ||'all',
- exceptions: (searchParams.get('exceptions') as FilterState['exceptions']) ||'all',
- };
-
- const updateFilter = useCallback(
- (key: keyof FilterState, value: string) => {
- const params = new URLSearchParams(searchParams.toString());
-
- if (value ==='all' || !value) {
- params.delete(key);
- } else {
- params.set(key, value);
- }
-
- startTransition(() => {
- router.push(`${pathname}?${params.toString()}`);
- });
- },
- [pathname, router, searchParams]
- );
-
- const clearFilters = useCallback(() => {
- startTransition(() => {
- router.push(pathname);
- });
- }, [pathname, router]);
-
- return { filters, updateFilter, clearFilters, isPending };
-};
-
+import { useFilters } from '@/src/hooks/useFilters';
+import { STATUS_OPTIONS } from '@/src/constants/filters';
 // --- HELPER COMPONENTS ---
 import { SearchDropdown } from'@/src/components/ui/dropdowns/SearchDropdown';
 import { StatusDropdown } from'@/src/components/ui/dropdowns/StatusDropdown';
