@@ -2,18 +2,34 @@
 import Image from "next/image"
 import BasicInput from "./BasicInput"
 import BasicButton from "./BasicButton"
-import { ModalProps } from "@/src/types/types"
+import { ModalProps, CreateShipmentPayload } from "@/src/types/types"
 import { motion } from "motion/react"
+import { useEffect } from "react"
 
 const NewShipmentModal = ({onClose}: ModalProps) => {
+
+    useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+
+    // cleanup to avoid memory leaks
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
   return (
-    <div 
+    <div onClick={onClose}
     // ref={scope}
     style={{
       fontFamily: "Inter"
     }} 
     className="w-full rounded-xl border border-[#E2E8F0] fixed inset-0 flex md:items-center justify-center bg-black/30 backdrop-blur-sm overflow-y-auto">
-      <motion.div
+      <motion.div onClick={(e) => e.stopPropagation()}
       initial={{
         opacity:0,
         filter: "blur(10px)",
@@ -37,12 +53,12 @@ const NewShipmentModal = ({onClose}: ModalProps) => {
       className="flex flex-col box">
       {/* HEADER */}
       <div className="bg-[#E2E8F0] py-5 px-8 rounded-t-xl flex items-center justify-between">
-      <div className="w-[70%]  flex flex-col ">
+      <div className="w-[70%] flex flex-col ">
         <span className="text-[22px]/[28px] font-bold">Create New Shipment</span>
         <span className="text-[12px] text-[#64748B]">Initialize a new logistics entry for the 3PL system.</span>
       </div>
       <button onClick={onClose} className="w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer">
-        <Image src="icons/cross.svg" alt="close" width={10} height={10} />
+        <Image src="/icons/cross.svg" alt="close" width={10} height={10} />
       </button>
       </div>
       {/* CONTENT - LOGISTICS & TIMELINE */}

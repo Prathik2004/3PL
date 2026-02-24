@@ -29,6 +29,9 @@ class ShipmentService
             );
         }
 
+        // assigned_to = specific user if provided, else null (visible to all Admin/Operations)
+        $assignedTo = $data['assign_to'] ?? null;
+
         $shipment = $this->repository->create([
             'shipment_id'            => $data['shipment_id'],
             'client_name'            => $data['client_name'],
@@ -40,7 +43,7 @@ class ShipmentService
             'pod_received'           => $data['pod_received'] ?? false,
             'status'                 => ShipmentStatus::CREATED,
             'last_status_update'     => DateHelper::nowUtc(),
-            'created_by'             => $userId,
+            'assigned_to'            => $assignedTo,
         ]);
 
         $this->logStatus($shipment->shipment_id, null, ShipmentStatus::CREATED, $userId);
@@ -49,6 +52,7 @@ class ShipmentService
             'id'          => $shipment->id,
             'shipment_id' => $shipment->shipment_id,
             'status'      => $shipment->status,
+            'assigned_to' => $assignedTo,
             'created_at'  => $shipment->created_at,
         ]);
     }
@@ -60,13 +64,7 @@ class ShipmentService
             'status', 'client_name', 'carrier_name',
             'date_from', 'date_to', 'search', 'include_cancelled',
         ]);
-
-        // Viewer — only see shipments they created
-        if ($user->role === 'Viewer') {
-            $filters['created_by'] = $user->id;
-        }
-
-        $perPage   = (int) $request->get('per_page', 20);
+        $perPage  = (int) $request->get('per_page', 20);
         $paginator = $this->repository->getAll($filters, $perPage);
 
         return ResponseHelper::paginated(
@@ -83,13 +81,6 @@ class ShipmentService
 
         if (!$shipment) {
             return ResponseHelper::notFound('Shipment not found');
-        }
-
-        // Viewer can only see shipments they created
-        if ($user->role === 'Viewer' && $shipment->created_by !== $user->id) {
-            return ResponseHelper::forbidden(
-                'You do not have access to this shipment.'
-            );
         }
 
         $logs = DB::table('shipment_logs')
