@@ -23,9 +23,16 @@ const getIntensityClass = (level: number) => {
   return levels[level] || "bg-[#F8FAFC]"
 }
 
-export function MonthlyExceptionHeatmap({ targetDate = new Date() }: { targetDate?: Date }) {
-  // 1. Calculate the start and end of the specific month
-  const start = startOfMonth(targetDate)
+export function MonthlyExceptionHeatmap({ targetDate }: { targetDate?: Date }) {
+  const [currentDate, setCurrentDate] = React.useState<Date | null>(null)
+
+  React.useEffect(() => {
+    setCurrentDate(targetDate || new Date())
+  }, [targetDate])
+
+  if (!currentDate) return <div className="h-[400px] w-full bg-white animate-pulse rounded-2xl" />
+
+  const start = startOfMonth(currentDate)
   const end = endOfMonth(start)
 
   // 2. Generate exactly the number of days in that month (30, 31, etc.)

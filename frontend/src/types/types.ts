@@ -3,17 +3,18 @@ export interface StatusIconProps {
   text: string
 }
 
-export interface ShipmentRowProps{
-    shipmentId: string;
-    client: string;
-    lastUpdated: string;
-    carrier: string;
-    dest: string;
-    // expDel: Date;
-    expDel: string
-    alert: string;
-    alertColor?: "Yellow" | "Red" | "None";
-    status: string
+export interface ShipmentRowProps {
+  shipmentId: string;
+  client: string;
+  lastUpdated: string;
+  carrier: string;
+  dest: string;
+  // expDel: Date;
+  expDel: string
+  alert: string;
+  alertColor?: "Yellow" | "Red" | "None";
+  status: string;
+  origin: string;
 }
 
 export interface ModalProps {
@@ -32,8 +33,13 @@ export interface ShipmentResponse {
   carrier_name: string;
   status: string;
   created_at?: string;
+  updated_at?: string;
   delivered_date?: string;
   pod_received?: boolean;
+  active_exception?: {
+    exception_type: string;
+    description: string;
+  };
 }
 
 export interface PaginatedShipments {
@@ -67,4 +73,4 @@ export interface BulkUploadResponse {
   errors: { row: number; shipment_id: string; issues: string[] }[];
 }
 
-export type Roles="Viewer" | "Operations" | "Admin";
+export type Roles = "Viewer" | "Operations" | "Admin";

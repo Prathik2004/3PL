@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import KpiCard from "@/src/components/common/KPICard";
 import { FilterBar } from "@/src/components/common/FilterBar";
 import { CarrierVolumeCard } from "@/src/components/analytics/CarrierVolumeCard";
@@ -17,7 +18,9 @@ export default function AnalyticsPage() {
 
       {/* Filter Bar */}
       <div className="flex items-center">
-        <FilterBar />
+        <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded bg-slate-100" />}>
+          <FilterBar />
+        </Suspense>
       </div>
 
       {/* Operations Visibility Chart */}
