@@ -6,16 +6,32 @@ import {
   BulkUploadResponse,
 } from "../types/types";
 
+export interface DashboardStats {
+    activeShipments: number;
+    delivered: number;
+    exceptions: number;
+    delayed: number;
+    onTimePercent: string;
+}
+
 export const shipmentService = {
   // GET /api/shipments
-  getAllShipments: async (page = 1, limit = 50, filters?: Record<string, string>): Promise<PaginatedShipments> => {
-    const queryParams = new URLSearchParams({
-      page: String(page),
-      limit: String(limit),
-      ...filters,
-    });
-    return apiFetch<PaginatedShipments>(`/shipments?${queryParams}`);
-  },
+  getAllShipments: async (page: number, limit: number, filters: any) => {
+        // FIX: Build query string manually for apiFetch
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+            ...filters
+        });
+        
+        const response = await apiFetch<PaginatedShipments>(`/shipments?${params.toString()}`);
+        return response;
+    },
+
+    getStats: async (): Promise<DashboardStats> => {
+        const response = await apiFetch<DashboardStats>('/shipments/stats');
+        return response;
+    },
 
   // POST /api/shipments
   createShipment: async (payload: CreateShipmentPayload): Promise<{ message: string; id: string }> => {
@@ -30,7 +46,6 @@ export const shipmentService = {
     const formData = new FormData();
     formData.append("file", file);
 
-    // apiFetch automatically handles not overriding multipart/form-data headers
     return apiFetch<BulkUploadResponse>("/shipments/upload", {
       method: "POST",
       body: formData,

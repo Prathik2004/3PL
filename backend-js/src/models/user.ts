@@ -16,18 +16,16 @@ export interface IUser extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
-  userId: {
-    type: Schema.Types.String,
-    default: () => uuidv4(),
-    unique: true,
-  },
+  userId: { type: String, default: () => uuidv4(), unique: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password_hash: { type: String, required: true },
-  role: {
-    type: String,
-    enum: ["Admin", "Operations", "Viewer"],
-    required: true,
+  // 1. ENSURE THIS IS password_hash (not password)
+  password_hash: { type: String, required: true, select: false },
+  role: { 
+    type: String, 
+    // 2. DOUBLE CHECK THESE STRINGS (No trailing spaces!)
+    enum: ["Admin", "Operations", "Viewer"], 
+    required: true 
   },
   created_at: { type: Date, default: Date.now },
   mustResetPassword: { type: Boolean, default: true },
@@ -36,4 +34,4 @@ const UserSchema = new Schema<IUser>({
   refreshToken: { type: String },
 });
 
-export default mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

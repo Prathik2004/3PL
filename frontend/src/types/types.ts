@@ -3,17 +3,17 @@ export interface StatusIconProps {
   text: string
 }
 
-export interface ShipmentRowProps {
-  shipmentId: string;
-  client: string;
-  lastUpdated: string;
-  carrier: string;
-  dest: string;
-  // expDel: Date;
-  expDel: string
-  alert: string;
-  alertColor?: "Yellow" | "Red" | "None";
-  status: string
+export interface ShipmentRowProps{
+    shipmentId: string;
+    client: string;
+    lastUpdated: string;
+    carrier: string;
+    dest: string;
+    // expDel: Date;
+    expDel: string
+    alert: string;
+    alertColor?: "Yellow" | "Red" | "None";
+    status: string
 }
 
 export interface ModalProps {
