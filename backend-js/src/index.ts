@@ -5,10 +5,11 @@ import express, { Request, Response, NextFunction } from "express";
 import shipmentRoutes from "./modules/shipment/route"; // Ensure 'Shipment'
 // matches folder name exactly
 import exceptionRoutes from "./modules/Expections/exceptionRoutes";
-import userRoutes from "./modules/User/UserRoutes";
+import { authenticate } from "./middleware/authenticate";
 import connectDB from "./config/database";
 import dotenv from "dotenv";
 import runExceptionTracker from "./cron/exceptionTracker";
+import userRoutes from "./modules/User/UserRoutes";
 dotenv.config();
 
 
@@ -62,7 +63,7 @@ app.use('/api/shipments', shipmentRoutes);
 app.use('/api/users', userRoutes);
 =======
 // This maps to endpoints like POST /api/shipments and GET /api/shipments
-app.use("/api/shipments", shipmentRoutes);
+app.use("/api/shipments", authenticate, shipmentRoutes);
 app.use("/api/exceptions", exceptionRoutes);
 >>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 
