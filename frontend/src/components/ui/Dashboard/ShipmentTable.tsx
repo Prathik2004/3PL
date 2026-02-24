@@ -68,7 +68,7 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
             alertColor,
             status: s.status,
             origin: s.origin,
-          };g
+          };
         });
 
         // if exception filter applied client side
