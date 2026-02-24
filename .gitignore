@@ -41,3 +41,7 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+
+/backend-js
+
+/backend-pythons
