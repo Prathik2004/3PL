@@ -139,11 +139,12 @@ const originDestinationOptions = [
           <Image src="/icons/logictics.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
-        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX"
+        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" 
+        value={shipmentId}
         onChange={(e) => setShipmentId(e.target.value)}/>
-        <BasicInput text="Client Selection" placeholder="#Select Client" onChange={(e) => setClient(e.target.value)} />
-        <BasicDropDownInput text="Carrier Name" options={deliveryServicesOptions} onChange={(e) => setCarrier(e.target.value)} />
-        <BasicDropDownInput text="Current Status" options={StatusOptions} onChange={(e) => setStatus(e.target.value)} 
+        <BasicInput text="Client Selection" value={client} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)}  />
+        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} value={carrier} />
+        <BasicDropDownInput text="Current Status" options={StatusOptions} value={status} onChange={(e) => setStatus(e.target.value)} 
         />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
@@ -152,8 +153,8 @@ const originDestinationOptions = [
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicDropDownInput text="Origin address" options={originDestinationOptions} onChange={(e) => setOriginAddress(e.target.value)} />
-        <BasicDropDownInput text="Destination address" options={destinationOptions} onChange={(e) => setDestination(e.target.value)} />
+        <BasicInput text="Origin address" placeholder="Enter origin address" value={originAddress} onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDestination(e.target.value)} />
         <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
         <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
       </div>

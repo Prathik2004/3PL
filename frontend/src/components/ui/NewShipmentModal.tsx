@@ -7,9 +7,11 @@ import { motion } from "motion/react"
 import { useEffect, useState } from "react"
 import BasicDropDownInput from "./BasicDropDownInput"
 
+type StatusProps="Created" | "Dispatched" | "Delayed" | "Delivered" | "In Transit"
+
 const NewShipmentModal = ({onClose}: ModalProps) => {
 
-  const StatusOptions=["In Transit", "Created", "Dispatched", "Delayed", "Delivered"]
+  const StatusOptions=["Created", "In Transit" , "Dispatched", "Delayed", "Delivered"]
   const destinationOptions = [
   "Austin, TX",
   "Dallas, TX",
@@ -44,23 +46,11 @@ const originDestinationOptions = [
   "Seattle, WA",
   "Las Vegas, NV"
   ];
- const deliveryServicesOptions = [
-    "UPS",
-    "FedEx",
-    "USPS",
-    "DHL Express",
-    "Amazon Logistics",
-    "OnTrac",
-    "LaserShip",
-    "Spee-Dee Delivery",
-    "Purolator",
-    "GLS"
-  ];
 
   const [shipmentId, setShipmentId]=useState<string>("");
   const [client, setClient]=useState<string>("");
   const [carrier,setCarrier]=useState<string>("");
-  const [status, setStatus]=useState<string>("");
+  const [status, setStatus]=useState<StatusProps>("Created");
   const [originAddress, setOriginAddress]=useState<string>("");
   const [dest,setDest]=useState<string>("");
   const [dispathDate, setDispatchDate]=useState<string>("");
@@ -127,11 +117,11 @@ const originDestinationOptions = [
           <Image src="/icons/logictics.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
-        <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX"
+        <BasicInput text="Shipment Id" value={shipmentId} placeholder="#SHP-77241-LX"
         onChange={(e) => setShipmentId(e.target.value)}/>
-        <BasicInput text="Client Selection" placeholder="Select Client" onChange={(e) => setClient(e.target.value)} />
-        <BasicDropDownInput text="Carrier Name" options={deliveryServicesOptions} onChange={(e) => setCarrier(e.target.value)} />
-        <BasicDropDownInput text="Current Status" options={StatusOptions} onChange={(e) => setStatus(e.target.value)} 
+        <BasicInput text="Client Selection" value={client} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)} />
+        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} />
+        <BasicDropDownInput text="Current Status" value={status} options={StatusOptions} onChange={(e) => setStatus(e.target.value as StatusProps)} 
         />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
@@ -140,8 +130,8 @@ const originDestinationOptions = [
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicDropDownInput text="Origin address" options={originDestinationOptions} onChange={(e) => setOriginAddress(e.target.value)} />
-        <BasicDropDownInput text="Destination address" options={destinationOptions} onChange={(e) => setDest(e.target.value)} />
+        <BasicInput text="Origin address" value={originAddress} placeholder="Enter origin address"  onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDest(e.target.value)} />
         <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
         <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
       </div>
