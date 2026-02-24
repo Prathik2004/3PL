@@ -9,6 +9,7 @@ export const createShipmentSchema = z.object({
   dispatch_date: z.coerce.date(),
   expected_delivery_date: z.coerce.date(),
   carrier_name: z.string().min(1),
+  created_by: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.dispatch_date > data.expected_delivery_date) {
     ctx.addIssue({

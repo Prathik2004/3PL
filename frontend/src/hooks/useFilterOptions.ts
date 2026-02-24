@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { fetchClientsApi, fetchCarriersApi, BackendClientData, BackendCarrierData } from '@/src/utils/filters';
 import { DropdownOption } from '@/src/components/ui/dropdowns/SearchDropdown';
-import { FilterCarrier } from '@/src/components/common/FilterBar';
+import { FilterCarrier } from '@/src/types/filter.types';
 
 export function useFilterOptions() {
   const [clientOptions, setClientOptions] = useState<DropdownOption<string>[]>([]);
