@@ -1,7 +1,6 @@
 "use client"
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
-<<<<<<< HEAD
 import { ShipmentRowProps } from "@/src/types/types";
 import { useState } from "react";
 import DeleteModal from "../DeleteModal";
@@ -11,8 +10,8 @@ import { AnimatePresence } from "motion/react";
 
 const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
 
-  const [deleteModalOpen, setDeleteModalOpen] =useState(false);
-  const [editModalOpen, setEditModalOpen] =useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   return (
     <div
@@ -22,18 +21,18 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
           ? "bg-white hover:bg-slate-50"
           : "bg-[#FFE8E8] hover:bg-[#FEE2E2]"
         } grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 border-b border-[#E2E8F0] cursor-pointer transition-colors duration-150`}>
-          <AnimatePresence >
-            
-          {editModalOpen && <EditShipmentModal 
-          shipmentId={shipmentId} 
+      <AnimatePresence >
+
+        {editModalOpen && <EditShipmentModal
+          shipmentId={shipmentId}
           client={client}
           carrier={carrier}
           dest={dest}
           status={status}
-          onClose={()=> setEditModalOpen(false)} /> }
+          onClose={() => setEditModalOpen(false)} />}
 
-          {deleteModalOpen && <DeleteModal onClose={()=> setDeleteModalOpen(false)} /> }
-          </AnimatePresence>
+        {deleteModalOpen && <DeleteModal shipmentId={shipmentId} onClose={() => setDeleteModalOpen(false)} />}
+      </AnimatePresence>
 
       {/* SHIPMENTID & CLIENT */}
       <div className="flex flex-col py-3">
@@ -88,23 +87,18 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
 
       {/* ACTIONS */}
       <div className="flex items-center justify-center gap-1 group">
-        <button onClick={()=> setEditModalOpen(true)} 
-        className="hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
-          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40}/>
+        <button onClick={() => setEditModalOpen(true)}
+          className="hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40} />
         </button>
-        <button onClick={()=> setDeleteModalOpen(true)} 
-        className="p-3 hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
-          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18}/>
+        <button onClick={() => setDeleteModalOpen(true)}
+          className="p-3 hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18} />
         </button>
 
       </div>
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
     </div>
   )
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 export default ShipmentRow

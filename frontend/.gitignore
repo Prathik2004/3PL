@@ -39,7 +39,4 @@ next-env.d.ts
 /backend-php/
 /backend-python/src/app/test-lab/
 src/app/test-lab/
-<<<<<<< HEAD
-=======
 /package-lock.*
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
