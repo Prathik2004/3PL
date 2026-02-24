@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import KpiCard from "@/src/components/common/KPICard";
+import ExceptionCard from "@/src/components/ui/Dashboard/ExceptionCard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 import { FilterBar } from "@/src/components/common/FilterBar";
 import { RefreshCwOff, FileText, CalendarX, ClipboardList } from "lucide-react";
@@ -24,29 +24,29 @@ export default function ExceptionsDashboard() {
 
       {/* KPI Summary Cards */}
       <div className="flex flex-nowrap lg:flex-row gap-4 overflow-x-auto pb-4 lg:pb-0">
-        <KpiCard
+        <ExceptionCard
           title="No Update"
-          value={8}
-          status="alert"
-          icon={<RefreshCwOff size={20} strokeWidth={1.8} className="text-[#475569]" />}
+          count={8}
+          severity="warning"
+          icon={RefreshCwOff}
         />
-        <KpiCard
+        <ExceptionCard
           title="Missing POD"
-          value={12}
-          status="alert"
-          icon={<FileText size={20} strokeWidth={1.8} className="text-[#475569]" />}
+          count={12}
+          severity="warning"
+          icon={FileText}
         />
-        <KpiCard
+        <ExceptionCard
           title="Critical Delay"
-          value={3}
-          status="critical"
-          icon={<CalendarX size={20} strokeWidth={1.8} className="text-[#475569]" />}
+          count={3}
+          severity="critical"
+          icon={CalendarX}
         />
-        <KpiCard
+        <ExceptionCard
           title="Not Dispatched"
-          value={1}
-          status="neutral"
-          icon={<ClipboardList size={20} strokeWidth={1.8} className="text-[#475569]" />}
+          count={1}
+          severity="neutral"
+          icon={ClipboardList}
         />
       </div>
 

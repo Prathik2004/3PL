@@ -28,7 +28,7 @@ const ExceptionCard: React.FC<ExceptionCardProps> = ({
           <Icon size={22} strokeWidth={1.8} className="text-[#475569]" />
         </div>
 
-        {/* Count + label */}
+        {/* Count on top, label below */}
         <div className="flex flex-col justify-center gap-[3px]">
           <span className="text-[28px] leading-none font-bold text-[#0F172A] tracking-tight">
             {count}
