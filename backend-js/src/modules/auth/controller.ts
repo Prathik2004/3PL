@@ -4,9 +4,12 @@ import {
   resetPassword,
   loginUser,
   refreshAccessToken,
+  requestPasswordReset,
 } from "./service";
 import { AuthRequest } from "../../middleware/authenticate";
 import User from "../../models/user";
+
+
 
 export const createUser = async (req: Request, res: Response) => {
   console.log("POST /api/auth/create-user - Request received:", req.body);
@@ -14,6 +17,16 @@ export const createUser = async (req: Request, res: Response) => {
     const { name, email, role } = req.body;
     const user = await createUserByAdmin(name, email, role);
     res.status(201).json({ message: "User created & email sent", user });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    await requestPasswordReset(email);
+    res.json({ message: "Password reset email sent" });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
