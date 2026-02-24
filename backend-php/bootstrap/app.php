@@ -29,25 +29,24 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (\Throwable $e, $request) {
 
-            // Only format API routes
+            
             if ($request->is('api/*') || $request->expectsJson()) {
 
-                // Validation Errors
                 if ($e instanceof ValidationException) {
                     return ResponseHelper::validationError($e->errors());
                 }
 
-                // 404
+                
                 if ($e instanceof NotFoundHttpException) {
                     return ResponseHelper::notFound('API route not found');
                 }
 
-                // 401
+                
                 if ($e instanceof UnauthorizedHttpException) {
                     return ResponseHelper::unauthorized();
                 }
 
-                // Default 500
+          
                 return ResponseHelper::error(
                     config('app.debug')
                         ? $e->getMessage()
