@@ -31,7 +31,8 @@ export const createUserByAdmin = async (
 
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
   const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
-  console.log(`NEW RESET LINK GENERATED for ${email}: ${resetLink}`);
+  
+  // console.log("SMTP_USER:", process.env.SMTP_USER);
   console.log(`Sending account creation email to: ${email}...`);
   try {
     const info = await transporter.sendMail({

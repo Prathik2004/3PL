@@ -29,7 +29,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
     return res.status(400).json({ error: 'Invalid JSON format. Check for missing commas or quotes.' });
   }
-  next();
+  return next();
 });
 
 connectDB();
