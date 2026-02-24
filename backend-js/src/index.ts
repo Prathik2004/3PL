@@ -23,6 +23,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware to handle JSON syntax errors
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid JSON format. Check for missing commas or quotes.' });
+  }
+  next();
+});
+
 connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

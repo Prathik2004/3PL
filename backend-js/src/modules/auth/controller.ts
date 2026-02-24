@@ -4,9 +4,12 @@ import {
   resetPassword,
   loginUser,
   refreshAccessToken,
+  requestPasswordReset,
 } from "./service";
 import { AuthRequest } from "../../middleware/authenticate";
 import User from "../../models/user";
+
+
 
 export const createUser = async (req: Request, res: Response) => {
   console.log("POST /api/auth/create-user - Request received:", req.body);
@@ -14,6 +17,16 @@ export const createUser = async (req: Request, res: Response) => {
     const { name, email, role } = req.body;
     const user = await createUserByAdmin(name, email, role);
     res.status(201).json({ message: "User created & email sent", user });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    await requestPasswordReset(email);
+    res.json({ message: "Password reset email sent" });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
@@ -49,14 +62,9 @@ export const login = async (req: Request, res: Response) => {
 };
 export const logout = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "User ID not found" });
-      return;
-    }
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ userId: req.user?.id } as any);
     if (user) {
-      user.refreshToken = undefined;
+      (user as any).refreshToken = null;
       await user.save();
     }
     res.json({ message: "Logged out successfully" });
