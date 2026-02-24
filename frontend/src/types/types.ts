@@ -13,7 +13,8 @@ export interface ShipmentRowProps{
     expDel: string
     alert: string;
     alertColor?: "Yellow" | "Red" | "None";
-    status: string
+    status: string;
+    origin: string;
 }
 
 export interface ModalProps {

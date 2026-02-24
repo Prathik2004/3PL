@@ -153,7 +153,7 @@ const originDestinationOptions = [
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicInput text="Origin address" placeholder="Enter origin address" value={originAddress} onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput text="Origin address" placeholder="Enter origin address" value={origin} onChange={(e) => setOriginAddress(e.target.value)} />
         <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDestination(e.target.value)} />
         <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
         <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
