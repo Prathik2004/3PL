@@ -25,8 +25,8 @@ class CsvUploadService
         // Validate file
         $fileValidator = CsvUploadValidator::validateFile($request->all());
         if ($fileValidator->fails()) {
-            return ResponseHelper::validationError(
-                $fileValidator->errors()->toArray()
+            return ResponseHelper::error(
+                $fileValidator->errors()->toArray(), 422
             );
         }
 
@@ -125,10 +125,9 @@ class CsvUploadService
         $perPage  = (int) $request->get('per_page', 10);
         $paginator = $this->repository->getLogs($perPage);
 
-        return ResponseHelper::paginated(
+        return ResponseHelper::success(
             'Upload logs retrieved',
-            $paginator,
-            collect($paginator->items())->toArray()
+            $paginator
         );
     }
 }

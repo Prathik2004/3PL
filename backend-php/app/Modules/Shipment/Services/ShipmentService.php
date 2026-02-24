@@ -24,8 +24,8 @@ class ShipmentService
         $validator = CreateShipmentValidator::validate($data);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
@@ -48,13 +48,13 @@ class ShipmentService
 
         $this->logStatus($shipment->shipment_id, null, ShipmentStatus::CREATED, $userId);
 
-        return ResponseHelper::created('Shipment created successfully', [
+        return ResponseHelper::success('Shipment created successfully', [
             'id'          => $shipment->id,
             'shipment_id' => $shipment->shipment_id,
             'status'      => $shipment->status,
             'assigned_to' => $assignedTo,
             'created_at'  => $shipment->created_at,
-        ]);
+        ], 201);
     }
 
     public function getAll(Request $request): JsonResponse
@@ -67,10 +67,9 @@ class ShipmentService
         $perPage  = (int) $request->get('per_page', 20);
         $paginator = $this->repository->getAll($filters, $perPage);
 
-        return ResponseHelper::paginated(
+        return ResponseHelper::success(
             'Shipments retrieved',
-            $paginator,
-            $paginator->items()
+            $paginator
         );
     }
 
@@ -80,7 +79,7 @@ class ShipmentService
         $shipment = $this->repository->findById($id);
 
         if (!$shipment) {
-            return ResponseHelper::notFound('Shipment not found');
+            return ResponseHelper::error('Shipment not found', 404);
         }
 
         $logs = DB::table('shipment_logs')
@@ -104,14 +103,14 @@ class ShipmentService
         $shipment = $this->repository->findById($id);
 
         if (!$shipment) {
-            return ResponseHelper::notFound('Shipment not found');
+            return ResponseHelper::error('Shipment not found', 404);
         }
 
         $validator = UpdateStatusValidator::validate($data, $shipment->dispatch_date);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
@@ -149,7 +148,7 @@ class ShipmentService
         $shipment = $this->repository->findById($id);
 
         if (!$shipment) {
-            return ResponseHelper::notFound('Shipment not found');
+            return ResponseHelper::error('Shipment not found', 404);
         }
 
         $allowed = [
@@ -168,7 +167,7 @@ class ShipmentService
         $shipment = $this->repository->findById($id);
 
         if (!$shipment) {
-            return ResponseHelper::notFound('Shipment not found');
+            return ResponseHelper::error('Shipment not found', 404);
         }
 
         $shipment->update(['status' => ShipmentStatus::CANCELLED]);

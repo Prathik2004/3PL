@@ -22,19 +22,19 @@ class AuthService
         $validator = RegisterValidator::validate($data);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
         $user = $this->repository->createUser($data);
         $token = JWTAuth::fromUser($user);
 
-        return ResponseHelper::created('User registered successfully', [
+        return ResponseHelper::success('User registered successfully', [
             'token'      => $token,
             'expires_in' => config('jwt.ttl') * 60,
             'user'       => $this->formatUser($user),
-        ]);
+        ], 201);
     }
 
     public function login(array $data): JsonResponse
@@ -42,15 +42,15 @@ class AuthService
         $validator = LoginValidator::validate($data);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
         $user = $this->repository->findByEmail($data['email']);
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            return ResponseHelper::error('Invalid email or password', [], 401);
+            return ResponseHelper::error('Invalid email or password', 401);
         }
 
         $token = JWTAuth::fromUser($user);
@@ -99,8 +99,8 @@ class AuthService
         $validator = UpdatePasswordValidator::validate($data);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
@@ -108,7 +108,7 @@ class AuthService
         $user = $this->repository->findByEmail($data['email']);
 
         if (!$user) {
-            return ResponseHelper::notFound('No account found with this email.');
+            return ResponseHelper::error('No account found with this email.', 404);
         }
 
         // Save new password

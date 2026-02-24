@@ -22,10 +22,9 @@ class UserService
         $perPage   = (int) $request->get('per_page', 20);
         $paginator = $this->repository->getAll($filters, $perPage);
 
-        return ResponseHelper::paginated(
+        return ResponseHelper::success(
             'Users retrieved',
-            $paginator,
-            $paginator->items()
+            $paginator
         );
     }
 
@@ -34,7 +33,7 @@ class UserService
         $user = $this->repository->findById($id);
 
         if (!$user) {
-            return ResponseHelper::notFound('User not found');
+            return ResponseHelper::error('User not found', 404);
         }
 
         $validator = Validator::make($data, [
@@ -45,8 +44,8 @@ class UserService
         ]);
 
         if ($validator->fails()) {
-            return ResponseHelper::validationError(
-                $validator->errors()->toArray()
+            return ResponseHelper::error(
+                $validator->errors()->toArray(), 422
             );
         }
 
@@ -73,14 +72,14 @@ class UserService
     {
         if ($id === $authUserId) {
             return ResponseHelper::error(
-                'You cannot delete your own account', [], 400
+                'You cannot delete your own account', 400
             );
         }
 
         $user = $this->repository->findById($id);
 
         if (!$user) {
-            return ResponseHelper::notFound('User not found');
+            return ResponseHelper::error('User not found', 404);
         }
 
         $this->repository->delete($user);
