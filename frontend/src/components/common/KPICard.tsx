@@ -7,8 +7,6 @@ interface KpiCardProps {
   trend?: "up" | "down" | "stable";
   status?: "success" | "alert" | "critical" | "neutral";
   iconSrc?: string;
-  /** Inline React icon component (e.g. from lucide-react) */
-  icon?: React.ReactNode;
 }
 
 const KpiCard: React.FC<KpiCardProps> = ({
@@ -18,7 +16,6 @@ const KpiCard: React.FC<KpiCardProps> = ({
   trend,
   status = "neutral",
   iconSrc,
-  icon,
 }) => {
   // Mapping statuses to Figma-accurate background and text colors
   const statusConfig = {
