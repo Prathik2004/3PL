@@ -1,0 +1,5 @@
+"Shipment ID","Client Name","Origin","Destination","Status","Carrier","Dispatch Date","Exp Delivery Date"
+"SHP-NOTDISPATCH-001","Delta Retail","Kolkata","Patna","Created","FedEx","15/2/2026","28/2/2026"
+"SHP-MISSINGPOD-001","Gamma Traders","Ahmedabad","Surat","Created","DHL","10/2/2026","12/2/2026"
+"SHP-NOUPDATE-001","Beta Pvt Ltd","Delhi","Jaipur","Created","Delhivery","20/2/2026","25/2/2026"
+"SHP-DELAY-001","Alpha Corp","Mumbai","Pune","Created","BlueDart","15/2/2026","18/2/2026"

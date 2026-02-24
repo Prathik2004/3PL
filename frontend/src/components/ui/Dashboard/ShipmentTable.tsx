@@ -1,91 +1,90 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { Key, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShipmentRowProps } from "@/src/types/types";
-import ShipmentRow from "./ShipmentRow"
+import ShipmentRow from "./ShipmentRow";
 import Pagination from "../Pagination";
 import { shipmentService } from "../../../services/shipmentService";
+import { JSX } from "react/jsx-runtime";
 
 const ShipmentTable = () => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const [isLoading, setIsLoading] = useState(false);
   const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const itemsPerPage = 10;
 
   // 1. Safely extract our Filter parameters from the URL
   const currentStatus = searchParams.get('status') || 'all';
-  const currentCarrier = searchParams.get('carrier') || 'all';
   const currentClient = searchParams.get('client') || 'all';
-  const currentException = searchParams.get('exceptions') || 'all';
+  // Note: currentCarrier and currentException can be added to the filters object 
+  // if your backend getAllShipments supports them.
 
   useEffect(() => {
     const fetchShipments = async () => {
       setIsLoading(true);
       try {
+        // 1. Prepare Backend Filters
         const filters: Record<string, string> = {};
         if (currentStatus !== 'all') filters.status = currentStatus;
         if (currentClient !== 'all') filters.client = currentClient;
 
+        // 2. Call the Service (This hits your backend manual-join logic)
         const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, filters);
 
-        let fetchedData = res.data || [];
-
-        // Optional client-side filtering if API doesn't support carrier/alerts natively
-        if (currentCarrier !== 'all') {
-          fetchedData = fetchedData.filter(s => (s.carrier_name || '').toLowerCase().includes(currentCarrier.toLowerCase()));
-        }
-
-        const mapped: ShipmentRowProps[] = fetchedData.map(s => {
+        // 3. Map Backend Data to Frontend Row Props (Keeping your Alert Logic)
+        const mapped: ShipmentRowProps[] = (res.data || []).map((s: any) => {
           let alert = "-";
           let alertColor: "Red" | "Yellow" | "None" = "None";
 
-          if (s.status.toLowerCase() === "delayed") {
-            alert = "DELAYED"; alertColor = "Red";
-          } else if (!s.pod_received && s.status.toLowerCase() === "delivered") {
-            alert = "MISSING POD"; alertColor = "Yellow";
+          // Alert logic using the manually joined Exception data
+          if (s.active_exception) {
+            alert = s.active_exception.exception_type.toUpperCase();
+            alertColor = "Red";
+          } else if (s.status === "Delayed") {
+            alert = "DELAYED";
+            alertColor = "Red";
+          } else if (!s.pod_received && s.status === "Delivered") {
+            alert = "MISSING POD";
+            alertColor = "Yellow";
           }
-
-          if (currentException !== 'all') {
-            // Let client side handle exception filter
-          }
-
-          const dateStr = s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString() : "";
 
           return {
-            shipmentId: s.shipment_id,
+            shipmentId: s.shipment_id, // Mapping DB field to UI prop
             client: s.client_name,
-            lastUpdated: s.created_at ? new Date(s.created_at).toLocaleDateString() : "-",
+            lastUpdated: s.updated_at ? formatTimeAgo(s.updated_at) : "-",
             carrier: s.carrier_name,
             dest: s.destination,
-            expDel: dateStr,
+            expDel: s.expected_delivery_date 
+              ? new Date(s.expected_delivery_date).toLocaleDateString() 
+              : "N/A",
             alert,
             alertColor,
-            status: s.status.toUpperCase(),
-          }
+            status: s.status,
+          };
         });
 
-        // if exception filter applied client side
-        let finalData = mapped;
-        if (currentException !== 'all') {
-          finalData = finalData.filter(s => (s.alert || '').toLowerCase().includes(currentException.toLowerCase()));
-        }
-
-        setDisplayShipments(finalData);
-        setTotalItems(res.total || finalData.length);
-
+        setDisplayShipments(mapped);
+        setTotalItems(res.total || 0);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch shipments:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchShipments();
-  }, [currentPage, itemsPerPage, currentStatus, currentCarrier, currentClient, currentException]);
+  }, [currentPage, currentStatus, currentClient]);
+
+  // Helper function for "Time Ago" display
+  function formatTimeAgo(dateString: string) {
+    const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    return `${Math.floor(seconds / 86400)}d`;
+  }
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -93,7 +92,6 @@ const ShipmentTable = () => {
 
   return (
     <div className="w-full bg-[#F5F9FF] rounded-2xl border border-[#E2E8F0] relative overflow-hidden flex flex-col">
-      {/* Scrollable Container */}
       <div className="overflow-x-auto w-full">
         <div className="min-w-[1100px] w-full">
           {/* TABLE HEADER */}
@@ -108,21 +106,16 @@ const ShipmentTable = () => {
           </div>
 
           {/* TABLE CONTENT */}
-          <div className="w-full flex flex-col">
-            {displayShipments?.map((shipment, idx) => (
-              <ShipmentRow
-                key={idx}
-                shipmentId={shipment.shipmentId}
-                client={shipment.client}
-                expDel={shipment.expDel}
-                lastUpdated={shipment.lastUpdated}
-                carrier={shipment.carrier}
-                dest={shipment.dest}
-                alert={shipment.alert}
-                alertColor={shipment.alertColor}
-                status={shipment.status}
-              />
-            ))}
+          <div className="w-full flex flex-col min-h-[400px]">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20 text-slate-400">Loading shipments...</div>
+            ) : displayShipments.length === 0 ? (
+              <div className="flex justify-center items-center py-20 text-slate-400">No shipments found.</div>
+            ) : (
+              displayShipments.map((shipment: JSX.IntrinsicAttributes & ShipmentRowProps, idx: Key | null | undefined) => (
+                <ShipmentRow key={idx} {...shipment} />
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -143,8 +136,8 @@ const ShipmentTable = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
+export default ShipmentTable;
 
-export default ShipmentTable

@@ -16,9 +16,5 @@ export const validateUpdateUser = (req: Request, res: Response, next: NextFuncti
             details: error.details.map(d => d.message)
         });
     }
-<<<<<<< HEAD
-    next();
-=======
     return next();
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
 };

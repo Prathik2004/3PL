@@ -7,7 +7,7 @@ import {
   requestPasswordReset,
 } from "./service";
 import { AuthRequest } from "../../middleware/authenticate";
-import User from "../../models/user";
+import { User } from "../../models/user";
 
 
 
