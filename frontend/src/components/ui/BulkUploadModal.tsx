@@ -6,7 +6,6 @@ import { useEffect } from "react"
 import { motion } from "motion/react"
 
 
-
 const BulkUploadModal = ({onClose}: ModalProps) => {
 
   // CLOSING MODAL WHEN esc IS HIT
