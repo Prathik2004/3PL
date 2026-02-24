@@ -6,7 +6,6 @@ import {
   BulkUploadResponse,
 } from "../types/types";
 
-<<<<<<< HEAD
 export interface DashboardStats {
     activeShipments: number;
     delivered: number;
@@ -33,18 +32,6 @@ export const shipmentService = {
         const response = await apiFetch<DashboardStats>('/shipments/stats');
         return response;
     },
-=======
-export const shipmentService = {
-  // GET /api/shipments
-  getAllShipments: async (page = 1, limit = 50, filters?: Record<string, string>): Promise<PaginatedShipments> => {
-    const queryParams = new URLSearchParams({
-      page: String(page),
-      limit: String(limit),
-      ...filters,
-    });
-    return apiFetch<PaginatedShipments>(`/shipments?${queryParams}`);
-  },
->>>>>>> 5fceba8fb477fcf1427389e90d9671c9d37bd18e
 
   // POST /api/shipments
   createShipment: async (payload: CreateShipmentPayload): Promise<{ message: string; id: string }> => {
@@ -59,10 +46,6 @@ export const shipmentService = {
     const formData = new FormData();
     formData.append("file", file);
 
-<<<<<<< HEAD
-=======
-    // apiFetch automatically handles not overriding multipart/form-data headers
->>>>>>> 5fceba8fb477fcf1427389e90d9671c9d37bd18e
     return apiFetch<BulkUploadResponse>("/shipments/upload", {
       method: "POST",
       body: formData,
@@ -86,8 +69,4 @@ export const shipmentService = {
       method: "DELETE",
     });
   },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 5fceba8fb477fcf1427389e90d9671c9d37bd18e

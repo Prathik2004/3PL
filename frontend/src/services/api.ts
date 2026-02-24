@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
-=======
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
->>>>>>> 5fceba8fb477fcf1427389e90d9671c9d37bd18e
 
 // Helper to get token (can be replaced with actual auth logic, e.g., getting from localStorage or cookies)
 export const getToken = (): string | null => {
@@ -52,8 +48,4 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   }
 
   return response.json();
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 5fceba8fb477fcf1427389e90d9671c9d37bd18e

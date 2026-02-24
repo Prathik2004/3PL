@@ -136,3 +136,4 @@ const ShipmentTable = () => {
 };
 
 export default ShipmentTable;
+
