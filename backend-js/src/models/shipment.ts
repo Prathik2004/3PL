@@ -33,7 +33,7 @@ const ShipmentSchema: Schema = new Schema(
   {
     id: { type: String, default: uuidv4, unique: true },
     shipment_id: { type: String, required: true, unique: true },
-    client_name: { type: String, required: true }, 
+    client_name: { type: String, required: true },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
     dispatch_date: { type: Date, required: true },
@@ -48,14 +48,14 @@ const ShipmentSchema: Schema = new Schema(
     last_status_update: { type: Date, default: Date.now },
     pod_received: { type: Boolean, default: false },
     created_by: {
-      type: String, 
-      ref: 'User',
-      required: true
-    }
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
-    collection: "shipments" // EXPLICITLY TELLS MONGOOSE WHERE TO LOOK
+    collection: "shipments", // EXPLICITLY TELLS MONGOOSE WHERE TO LOOK
   },
 );
 
