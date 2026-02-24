@@ -33,17 +33,17 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/*') || $request->expectsJson()) {
 
                 if ($e instanceof ValidationException) {
-                    return ResponseHelper::validationError($e->errors());
+                    return ResponseHelper::error($e->errors(), 422);
                 }
 
                 
                 if ($e instanceof NotFoundHttpException) {
-                    return ResponseHelper::notFound('API route not found');
+                    return ResponseHelper::error('API route not found', 404);
                 }
 
                 
                 if ($e instanceof UnauthorizedHttpException) {
-                    return ResponseHelper::unauthorized();
+                    return ResponseHelper::error('Unauthorized', 401);
                 }
 
           
@@ -51,7 +51,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     config('app.debug')
                         ? $e->getMessage()
                         : 'Internal Server Error',
-                    [],
                     500
                 );
             }
