@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/src/components/ui/progress"
 
 interface CarrierVolumeData {
   name: string;
@@ -48,10 +48,10 @@ export function CarrierVolumeCard() {
                 {carrier.percentage}%
               </span>
             </div>
-            
-            <Progress 
-              value={carrier.percentage} 
-              indicatorColor={carrier.color} 
+
+            <Progress
+              value={carrier.percentage}
+              indicatorColor={carrier.color}
               className="h-[8px]"
             />
           </div>

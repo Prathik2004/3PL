@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/src/components/ui/card"
 import {
   ChartContainer,
   ChartLegend,
@@ -17,14 +17,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/src/components/ui/chart"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/src/components/ui/select"
 
 export const description = "An interactive area chart for system activity"
 
@@ -73,7 +73,7 @@ export function ChartAreaInteractive() {
         <div className="grid flex-1 gap-1">
           <CardTitle>Operations Visibility</CardTitle>
           <CardDescription>
-            Comparing active users vs. shipment orders 
+            Comparing active users vs. shipment orders
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
