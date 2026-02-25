@@ -1,4 +1,5 @@
 import React from "react";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
@@ -33,6 +34,13 @@ const Pagination: React.FC<PaginationProps> = ({
     return pages;
   };
 
+  const handlePageClick = (page: number | string) => {
+    if (typeof page === "number") {
+      onPageChange(page);
+    }
+  };
+
+
   return (
     <div className="flex items-center gap-2">
       {/* Previous Button */}
@@ -54,10 +62,11 @@ const Pagination: React.FC<PaginationProps> = ({
               </span>
             ) : (
               <button
-                onClick={() => onPageChange(page as number)}
+                onClick={() => handlePageClick(page)}
+
                 className={`w-10 h-10 flex items-center justify-center rounded-xl text-[14px] font-semibold transition-all ${currentPage === page
-                    ? "bg-[#0F172A] text-white shadow-sm"
-                    : "border border-[#E2E8F0] text-[#64748B] hover:bg-slate-50"
+                  ? "bg-[#0F172A] text-white shadow-sm"
+                  : "border border-[#E2E8F0] text-[#64748B] hover:bg-slate-50"
                   }`}
               >
                 {page}
