@@ -198,16 +198,16 @@ export default function LogsPage() {
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-[#F8FAFC]/50 border-b border-[#E2E8F0]">
-                <th className="px-10 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
+                <th className="px-6 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
                   Timestamp
                 </th>
-                <th className="px-8 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
+                <th className="px-6 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
                   User / System
                 </th>
-                <th className="px-8 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
+                <th className="px-6 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest">
                   Event Action
                 </th>
-                <th className="px-10 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest text-right">
+                <th className="px-6 py-5 text-[12px] font-bold text-[#64748B] uppercase tracking-widest text-center">
                   Status
                 </th>
               </tr>
@@ -215,10 +215,10 @@ export default function LogsPage() {
             <tbody className="divide-y divide-[#E2E8F0]">
               {mockLogs.map((log, index) => (
                 <tr key={index} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-10 py-6 text-[14px] text-[#64748B] font-medium">
+                  <td className="px-6 py-6 text-[14px] text-[#64748B] font-medium">
                     {log.timestamp}
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-6 py-6">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center border border-slate-100/50">
                         {log.type === "system" ? (
@@ -232,10 +232,10 @@ export default function LogsPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-[14.5px] text-[#475569] font-medium leading-relaxed">
+                  <td className="px-6 py-6 text-[14.5px] text-[#475569] font-medium leading-relaxed">
                     {log.action}
                   </td>
-                  <td className="px-10 py-6 text-right">
+                  <td className="px-6 py-6 text-center">
                     <span
                       className={`inline-flex items-center px-4 py-1.5 rounded-full text-[12.5px] font-bold ${log.status === "Success"
                         ? "bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
