@@ -1,49 +1,52 @@
 "use client";
-import { Key, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow";
 import Pagination from "../Pagination";
 import { shipmentService } from "../../../services/shipmentService";
 import { formatTimeAgo } from "../../../utils/dateUtils";
 
-interface ShipmentTableProps {
-  onlyExceptions?: boolean;
+export interface ShipmentFilters {
+  status?: string;
+  client?: string;
+  carrier?: string;
+  exception?: string;
+  search?: string;
 }
 
-const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
-  const searchParams = useSearchParams();
+interface ShipmentTableProps {
+  onlyExceptions?: boolean;
+  filters?: ShipmentFilters;
+}
+
+const ShipmentTable = ({ onlyExceptions = false, filters = {} }: ShipmentTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [displayShipments, setDisplayShipments] = useState<ShipmentRowProps[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
 
-  // 1. Safely extract our Filter parameters from the URL
-  const currentStatus = searchParams.get('status') || 'all';
-  const currentClient = searchParams.get('client') || 'all';
-  const currentCarrier = searchParams.get('carrier') || 'all';
-  const currentException = searchParams.get('exception') || 'all';
+  // Stringify filters to use as a stable dependency
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
     const fetchShipments = async () => {
       setIsLoading(true);
       try {
-        // 1. Prepare Backend Filters
-        const filters: Record<string, string> = {};
-        if (currentStatus !== 'all') filters.status = currentStatus;
-        if (currentClient !== 'all') filters.client = currentClient;
-        if (currentCarrier !== 'all') filters.carrier = currentCarrier;
+        // Build query params — only send non-empty, non-'all' values
+        const query: Record<string, string> = {};
+        if (filters.status && filters.status !== 'all') query.status = filters.status;
+        if (filters.client && filters.client !== 'all') query.client = filters.client;
+        if (filters.carrier && filters.carrier !== 'all') query.carrier = filters.carrier;
+        if (filters.exception && filters.exception !== 'all') query.exception = filters.exception;
+        if (filters.search) query.search = filters.search;
 
-        // 2. Call the Service (This hits your backend manual-join logic)
-        const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, filters);
+        const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, query);
 
-        // 3. Map Backend Data to Frontend Row Props (Keeping your Alert Logic)
         const mapped: ShipmentRowProps[] = (res.data || []).map((s: any) => {
           let alert = "-";
           let alertColor: "Red" | "Yellow" | "None" = "None";
 
-          // Alert logic using the manually joined Exception data
           if (s.active_exception) {
             alert = s.active_exception.exception_type.toUpperCase();
             alertColor = "Red";
@@ -56,9 +59,9 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
           }
 
           return {
-            shipmentId: s.shipment_id,   // Human-readable
-            internalId: s.id,            // UUID for PUT/DELETE API
-            _mongoId: s._id?.toString(), // MongoDB ObjectId for exception lookup
+            shipmentId: s.shipment_id,
+            internalId: s.id,
+            _mongoId: s._id?.toString(),
             client: s.client_name,
             lastUpdated: s.updated_at ? formatTimeAgo(s.updated_at) : "-",
             carrier: s.carrier_name,
@@ -73,19 +76,9 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
           };
         });
 
-        // if exception filter applied client side
-        let finalData = mapped;
-        if (currentException !== 'all') {
-          finalData = finalData.filter(s => (s.alert || '').toLowerCase().includes(currentException.toLowerCase()));
-        }
-
-        if (onlyExceptions) {
-          finalData = finalData.filter(s => s.alert !== "-");
-        }
-
+        let finalData = onlyExceptions ? mapped.filter(s => s.alert !== "-") : mapped;
         setDisplayShipments(finalData);
         setTotalItems(res.total || finalData.length);
-
       } catch (err) {
         console.error("Failed to fetch shipments:", err);
       } finally {
@@ -94,7 +87,14 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
     };
 
     fetchShipments();
-  }, [currentPage, itemsPerPage, currentStatus, currentCarrier, currentClient, currentException, onlyExceptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, filtersKey, onlyExceptions]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersKey]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -106,7 +106,7 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
         <div className="min-w-[1100px] w-full">
           {/* TABLE HEADER */}
           <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 text-[#64748B] text-[12px] font-bold h-[64px] w-full border-b border-[#E2E8F0] bg-slate-50/50">
-            <span className="text-left py-2">SHIPMENT ID & CLIENT</span>
+            <span className="text-left py-2">SHIPMENT ID &amp; CLIENT</span>
             <span className="text-center py-2">CARRIER</span>
             <span className="text-center py-2">DESTINATION</span>
             <span className="text-center py-2">EXP. DELIVERY</span>
@@ -150,4 +150,3 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
 };
 
 export default ShipmentTable;
-

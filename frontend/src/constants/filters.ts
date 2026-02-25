@@ -2,13 +2,12 @@ import { DropdownOption } from '@/src/components/ui/dropdowns/SearchDropdown';
 import { FilterSortStatus } from '@/src/types/filter.types';
 
 export const STATUS_OPTIONS: DropdownOption<FilterSortStatus>[] = [
-  { label: 'Created', value: 'created' },
-  { label: 'Dispatched', value: 'dispatched' },
-  { label: 'In Transit', value: 'in_transit' },
-  { label: 'Out for Delivery', value: 'out_for_delivery' },
-  { label: 'Delivered', value: 'delivered' },
-  { label: 'Cancelled', value: 'cancelled' },
-  { label: 'Delayed', value: 'delayed' },
+  { label: 'Created', value: 'Created' },
+  { label: 'Dispatched', value: 'Dispatched' },
+  { label: 'In Transit', value: 'In Transit' },
+  { label: 'Out for Delivery', value: 'Out for Delivery' },
+  { label: 'Delivered', value: 'Delivered' },
+  { label: 'Delayed', value: 'Delayed' },
 ];
 
 export const EXCEPTION_OPTIONS = [

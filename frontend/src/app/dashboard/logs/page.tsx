@@ -108,6 +108,9 @@ export default function LogsPage() {
     setIsLoading(true);
     setError(null);
     try {
+      // Silently seed demo data if fewer than 10 logs exist (idempotent)
+      await apiClient<{ message: string }>("/logs/seed", { method: "POST" }).catch(() => { });
+
       const params = new URLSearchParams({
         page: String(currentPage),
         limit: String(LIMIT),
@@ -261,8 +264,8 @@ export default function LogsPage() {
                     </td>
                     <td className="px-6 py-6 text-center">
                       <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[12.5px] font-bold ${log.status === "Success"
-                          ? "bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
-                          : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
+                        ? "bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
+                        : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
                         }`}>
                         {log.status}
                       </span>
