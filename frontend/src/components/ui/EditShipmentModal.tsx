@@ -38,61 +38,59 @@ const EditShipmentModal = ({shipmentId, client, carrier, status, origin, dest, d
   }, [onClose]);
 
   const StatusOptions=["In Transit", "Created", "Dispatched", "Delayed", "Delivered"]
-  const destinationOptions = [
-    "Austin, TX",
-    "Dallas, TX",
-    "Houston, TX",
-    "San Antonio, TX",
-    "Los Angeles, CA",
-    "San Diego, CA",
-    "San Francisco, CA",
-    "Phoenix, AZ",
-    "Denver, CO",
-    "Chicago, IL",
-    "Atlanta, GA",
-    "Miami, FL",
-    "New York, NY",
-    "Seattle, WA",
-    "Las Vegas, NV"
-  ];
-const originDestinationOptions = [
-    "Austin, TX",
-    "Dallas, TX",
-    "Houston, TX",
-    "San Antonio, TX",
-    "Los Angeles, CA",
-    "San Diego, CA",
-    "San Francisco, CA",
-    "Phoenix, AZ",
-    "Denver, CO",
-    "Chicago, IL",
-    "Atlanta, GA",
-    "Miami, FL",
-    "New York, NY",
-    "Seattle, WA",
-    "Las Vegas, NV"
-  ];
-  const deliveryServicesOptions = [
-    "UPS",
-    "FedEx",
-    "USPS",
-    "DHL Express",
-    "Amazon Logistics",
-    "OnTrac",
-    "LaserShip",
-    "Spee-Dee Delivery",
-    "Purolator",
-    "GLS"
-  ];
+//   const destinationOptions = [
+//     "Austin, TX",
+//     "Dallas, TX",
+//     "Houston, TX",
+//     "San Antonio, TX",
+//     "Los Angeles, CA",
+//     "San Diego, CA",
+//     "San Francisco, CA",
+//     "Phoenix, AZ",
+//     "Denver, CO",
+//     "Chicago, IL",
+//     "Atlanta, GA",
+//     "Miami, FL",
+//     "New York, NY",
+//     "Seattle, WA",
+//     "Las Vegas, NV"
+//   ];
+// const originDestinationOptions = [
+//     "Austin, TX",
+//     "Dallas, TX",
+//     "Houston, TX",
+//     "San Antonio, TX",
+//     "Los Angeles, CA",
+//     "San Diego, CA",
+//     "San Francisco, CA",
+//     "Phoenix, AZ",
+//     "Denver, CO",
+//     "Chicago, IL",
+//     "Atlanta, GA",
+//     "Miami, FL",
+//     "New York, NY",
+//     "Seattle, WA",
+//     "Las Vegas, NV"
+//   ];
+//   const deliveryServicesOptions = [
+//     "UPS",
+//     "FedEx",
+//     "USPS",
+//     "DHL Express",
+//     "Amazon Logistics",
+//     "OnTrac",
+//     "LaserShip",
+//     "Spee-Dee Delivery",
+//     "Purolator",
+//     "GLS"
+//   ];
 
-    const [shipment_Id, setShipmentId]=useState<string>("");
-    const [clientName, setClient]=useState<string>("");
-    const [carrierMame,setCarrier]=useState<string>("");
-    const [Status, setStatus]=useState<string>("");
-    const [originAddress, setOriginAddress]=useState<string>("");
-    const [destination,setDestination]=useState<string>("");
-    const [dispathDate, setDispatchDate]=useState<string>("");
-    const [expDel, setExpDel]=useState("")
+  const [shipment_Id, setShipmentId] = useState(shipmentId ?? "");
+  const [clientName, setClient] = useState(client ?? "");
+  const [carrierName, setCarrier] = useState(carrier ?? "");
+  const [currentStatus, setStatus] = useState(status ?? "");
+  const [originAddress, setOriginAddress] = useState(origin ?? "");
+  const [destinationAddress, setDestination] = useState(dest ?? "");
 
   return (
     <div onClick={onClose}
@@ -141,11 +139,11 @@ const originDestinationOptions = [
           <span className="text-[14px]/[20px] text-black"> LOGISTICS BASICS </span>
         </div>
         <BasicInput text="Shipment Id" placeholder="#SHP-77241-LX" 
-        value={shipmentId}
+        value={shipment_Id}
         onChange={(e) => setShipmentId(e.target.value)}/>
-        <BasicInput text="Client Selection" value={client} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)}  />
-        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} value={carrier} />
-        <BasicDropDownInput text="Current Status" options={StatusOptions} value={status} onChange={(e) => setStatus(e.target.value)} 
+        <BasicInput text="Client Selection" value={clientName} placeholder="Enter Client" onChange={(e) => setClient(e.target.value)}  />
+        <BasicInput text="Carrier Name" placeholder="Enter carrier name" onChange={(e) => setCarrier(e.target.value)} value={carrierName} />
+        <BasicDropDownInput text="Current Status" options={StatusOptions} value={currentStatus} onChange={(e) => setStatus(e.target.value)} 
         />
       </div>
       {/* TIMELINE & ROUTE SECTION */}
@@ -154,8 +152,8 @@ const originDestinationOptions = [
           <Image src="/icons/timeline.svg" alt="image" width={10} height={10} />
           <span className="text-[14px]/[20px] text-black"> TIMELINE & ROUTE </span>
         </div>
-        <BasicInput text="Origin address" placeholder="Enter origin address" value={origin} onChange={(e) => setOriginAddress(e.target.value)} />
-        <BasicInput value={dest} text="Destination address" placeholder="Enter destination" onChange={(e) => setDestination(e.target.value)} />
+        <BasicInput text="Origin address" placeholder="Enter origin address" value={originAddress} onChange={(e) => setOriginAddress(e.target.value)} />
+        <BasicInput value={destinationAddress} text="Destination address" placeholder="Enter destination" onChange={(e) => setDestination(e.target.value)} />
         <BasicInput type="datetime-local" text="Dispatch Date" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setDispatchDate(e.target.value)} />
         <BasicInput type="datetime-local" text="Expected Delivery" placeholder="mm/dd/yy, --:--:--" onChange={(e) => setExpDel(e.target.value)} />
       </div>
