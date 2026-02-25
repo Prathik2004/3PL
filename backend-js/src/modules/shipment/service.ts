@@ -23,7 +23,7 @@ export class ShipmentService {
                     results.push({ row: rowNumber, data });
                 })
                 .on('end', async () => {
-                    const successfulInserts: string[] = []; 
+                    const successfulInserts: string[] = [];
 
                     for (const item of results) {
                         try {
@@ -33,18 +33,29 @@ export class ShipmentService {
 
                             const newShipment = await Shipment.create({
                                 ...validData,
-                                created_by: userId, 
+                                created_by: userId,
                                 status: ShipmentStatus.CREATED,
                                 pod_received: false,
                                 last_status_update: new Date(),
                             });
 
                             successfulInserts.push(newShipment.shipment_id);
+                            // backend-js\src\modules\shipment\service.ts -> inside processCsvUpload
+
+                            // CHANGE THIS BLOCK:
                         } catch (error: any) {
+                            let errorMessages: string[] = [];
+
+                            if (error.name === 'ZodError') {
+                                errorMessages = error.errors.map((e: any) => e.message);
+                            } else {
+                                errorMessages = [error.message || "Unknown error"];
+                            }
+
                             errors.push({
                                 row: item.row,
                                 shipment_id: item.data.shipment_id || 'Unknown',
-                                issues: error.errors?.map((e: any) => e.message) || [error.message]
+                                issues: errorMessages
                             });
                         }
                     }
@@ -156,8 +167,11 @@ export class ShipmentService {
         };
     }
 
+    // src/modules/shipment/service.ts
+
     static async updateStatus(id: string, updateData: any, userId: string, userRole: string) {
-        const query: any = { _id: id }; // Note: Ensure you use _id for MongoDB lookups
+        // CHANGE THIS: query by 'id' (your UUID field), not '_id'
+        const query: any = { id: id };
 
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
             query.created_by = userId;
@@ -174,7 +188,9 @@ export class ShipmentService {
     }
 
     static async cancelShipment(id: string, userId: string, userRole: string) {
-        const query: any = { _id: id };
+        // CHANGE THIS: query by 'id'
+        const query: any = { id: id };
+
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
             query.created_by = userId;
         }
@@ -200,7 +216,7 @@ export class ShipmentService {
             .sort({ created_at: -1 })
             .populate('creator_details', 'name')
             .lean();
-        
+
         const exportData = shipments.map((s: any) => ({
             'Shipment ID': s.shipment_id,
             'Client Name': s.client_name,
