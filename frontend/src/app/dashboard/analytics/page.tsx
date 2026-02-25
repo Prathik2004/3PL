@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import KpiCard from "@/src/components/common/KPICard";
 import { FilterBar } from "@/src/components/common/FilterBar";
 import { CarrierVolumeCard } from "@/src/components/analytics/CarrierVolumeCard";
 import { MonthlyExceptionHeatmap } from "@/src/components/analytics/CalendarHeatmap";
 import { ChartAreaInteractive } from "@/src/components/analytics/AreaChart";
-import { ANALYTICS_METRICS } from "@/src/utils/mockData";
+import { ANALYTICS_METRICS } from "@/src/constants/mockData";
 
 export default function AnalyticsPage() {
   return (
@@ -17,7 +18,9 @@ export default function AnalyticsPage() {
 
       {/* Filter Bar */}
       <div className="flex items-center">
-        <FilterBar />
+        <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded bg-slate-100" />}>
+          <FilterBar />
+        </Suspense>
       </div>
 
       {/* Operations Visibility Chart */}

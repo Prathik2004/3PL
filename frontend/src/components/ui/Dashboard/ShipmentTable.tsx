@@ -5,9 +5,13 @@ import { ShipmentRowProps } from "@/src/types/types";
 import ShipmentRow from "./ShipmentRow";
 import Pagination from "../Pagination";
 import { shipmentService } from "../../../services/shipmentService";
-import { JSX } from "react/jsx-runtime";
+import { formatTimeAgo } from "../../../utils/dateUtils";
 
-const ShipmentTable = () => {
+interface ShipmentTableProps {
+  onlyExceptions?: boolean;
+}
+
+const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,8 +22,8 @@ const ShipmentTable = () => {
   // 1. Safely extract our Filter parameters from the URL
   const currentStatus = searchParams.get('status') || 'all';
   const currentClient = searchParams.get('client') || 'all';
-  // Note: currentCarrier and currentException can be added to the filters object 
-  // if your backend getAllShipments supports them.
+  const currentCarrier = searchParams.get('carrier') || 'all';
+  const currentException = searchParams.get('exception') || 'all';
 
   useEffect(() => {
     const fetchShipments = async () => {
@@ -29,6 +33,7 @@ const ShipmentTable = () => {
         const filters: Record<string, string> = {};
         if (currentStatus !== 'all') filters.status = currentStatus;
         if (currentClient !== 'all') filters.client = currentClient;
+        if (currentCarrier !== 'all') filters.carrier = currentCarrier;
 
         // 2. Call the Service (This hits your backend manual-join logic)
         const res = await shipmentService.getAllShipments(currentPage, itemsPerPage, filters);
@@ -56,17 +61,29 @@ const ShipmentTable = () => {
             lastUpdated: s.updated_at ? formatTimeAgo(s.updated_at) : "-",
             carrier: s.carrier_name,
             dest: s.destination,
-            expDel: s.expected_delivery_date 
-              ? new Date(s.expected_delivery_date).toLocaleDateString() 
+            expDel: s.expected_delivery_date
+              ? new Date(s.expected_delivery_date).toLocaleDateString()
               : "N/A",
             alert,
             alertColor,
             status: s.status,
+            origin: s.origin,
           };
         });
 
-        setDisplayShipments(mapped);
-        setTotalItems(res.total || 0);
+        // if exception filter applied client side
+        let finalData = mapped;
+        if (currentException !== 'all') {
+          finalData = finalData.filter(s => (s.alert || '').toLowerCase().includes(currentException.toLowerCase()));
+        }
+
+        if (onlyExceptions) {
+          finalData = finalData.filter(s => s.alert !== "-");
+        }
+
+        setDisplayShipments(finalData);
+        setTotalItems(res.total || finalData.length);
+
       } catch (err) {
         console.error("Failed to fetch shipments:", err);
       } finally {
@@ -75,15 +92,7 @@ const ShipmentTable = () => {
     };
 
     fetchShipments();
-  }, [currentPage, currentStatus, currentClient]);
-
-  // Helper function for "Time Ago" display
-  function formatTimeAgo(dateString: string) {
-    const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-    return `${Math.floor(seconds / 86400)}d`;
-  }
+  }, [currentPage, itemsPerPage, currentStatus, currentCarrier, currentClient, currentException, onlyExceptions]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -111,8 +120,8 @@ const ShipmentTable = () => {
             ) : displayShipments.length === 0 ? (
               <div className="flex justify-center items-center py-20 text-slate-400">No shipments found.</div>
             ) : (
-              displayShipments.map((shipment: JSX.IntrinsicAttributes & ShipmentRowProps, idx: Key | null | undefined) => (
-                <ShipmentRow key={idx} {...shipment} />
+              displayShipments.map((shipment) => (
+                <ShipmentRow key={shipment.shipmentId} {...shipment} />
               ))
             )}
           </div>
