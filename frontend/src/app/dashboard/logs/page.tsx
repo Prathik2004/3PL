@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import ExportButton from "@/src/components/ui/ExportButton";
 import Pagination from "@/src/components/ui/Pagination";
 import Image from "next/image";
+import { mockLogs } from "@/src/constants/mockData";
 
 // Local Filter Dropdown to match the design exactly as shown in the image
 interface FilterOption {
@@ -46,7 +47,7 @@ const FilterDropdown = ({ icon, label, value, options, onChange }: FilterDropdow
         <span className="text-[#94A3B8]">{icon}</span>
         {label && <span className="text-[14px] font-medium text-[#64748B]">{label}:</span>}
         <span className="text-[14px] font-bold text-[#0F172A]">{activeLabel}</span>
-        <ChevronDown className={`h-4 w-4 text-[#64748B] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <Image src="/icons/chevron.svg" alt="Chevron" width={12} height={12} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
@@ -72,56 +73,7 @@ const FilterDropdown = ({ icon, label, value, options, onChange }: FilterDropdow
 };
 
 // Mock data based on the provided image
-const mockLogs = [
-  {
-    timestamp: "Oct 24, 2024 | 14:00",
-    user: "Alice Thompson",
-    role: "Admin",
-    action: 'User "Alice" deleted "John Doe"',
-    status: "Success",
-    type: "user",
-  },
-  {
-    timestamp: "Oct 24, 2024 | 12:30",
-    user: "Robert Chen",
-    role: "User",
-    action: "Failed login attempt from IP 192.168.1.1",
-    status: "Failed",
-    type: "user",
-  },
-  {
-    timestamp: "Oct 24, 2024 | 16:20",
-    user: "Alice Thompson",
-    role: "Admin",
-    action: "Updated shipment route #SHP-9921",
-    status: "Success",
-    type: "user",
-  },
-  {
-    timestamp: "Oct 24, 2024 | 09:15",
-    user: "System Engine",
-    role: "System",
-    action: "API Key 'Production_Main' rotated",
-    status: "Success",
-    type: "system",
-  },
-  {
-    timestamp: "Oct 24, 2024 | 18:05",
-    user: "Mark Wilson",
-    role: "User",
-    action: "Exported fleet utilization report",
-    status: "Failed",
-    type: "user",
-  },
-  {
-    timestamp: "Oct 24, 2024 | 11:20",
-    user: "Sarah Jenkins",
-    role: "User",
-    action: 'New user "T.Smith" onboarded',
-    status: "Success",
-    type: "user",
-  }
-];
+
 
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -40,3 +40,54 @@ export const ANALYTICS_METRICS = [
     iconSrc: "/icons/exceptions.svg",
   },
 ] as const;
+
+export const mockLogs = [
+  {
+    timestamp: "Oct 24, 2024 | 14:00",
+    user: "Alice Thompson",
+    role: "Admin",
+    action: 'User "Alice" deleted "John Doe"',
+    status: "Success",
+    type: "user",
+  },
+  {
+    timestamp: "Oct 24, 2024 | 12:30",
+    user: "Robert Chen",
+    role: "User",
+    action: "Failed login attempt from IP 192.168.1.1",
+    status: "Failed",
+    type: "user",
+  },
+  {
+    timestamp: "Oct 24, 2024 | 16:20",
+    user: "Alice Thompson",
+    role: "Admin",
+    action: "Updated shipment route #SHP-9921",
+    status: "Success",
+    type: "user",
+  },
+  {
+    timestamp: "Oct 24, 2024 | 09:15",
+    user: "System Engine",
+    role: "System",
+    action: "API Key 'Production_Main' rotated",
+    status: "Success",
+    type: "system",
+  },
+  {
+    timestamp: "Oct 24, 2024 | 18:05",
+    user: "Mark Wilson",
+    role: "User",
+    action: "Exported fleet utilization report",
+    status: "Failed",
+    type: "user",
+  },
+  {
+    timestamp: "Oct 24, 2024 | 11:20",
+    user: "Sarah Jenkins",
+    role: "User",
+    action: 'New user "T.Smith" onboarded',
+    status: "Success",
+    type: "user",
+  }
+] as const;
