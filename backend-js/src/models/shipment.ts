@@ -47,7 +47,7 @@ const ShipmentSchema: Schema = new Schema(
     carrier_name: { type: String, required: true },
     last_status_update: { type: Date, default: Date.now },
     pod_received: { type: Boolean, default: false },
-    created_by: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    created_by: { type:String, ref: "User", required: true },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

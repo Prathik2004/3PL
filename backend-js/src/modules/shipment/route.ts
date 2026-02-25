@@ -11,7 +11,7 @@ const router = Router();
 // Export - All logged in users can export their own (or all if admin) data
 router.get('/export', authenticate, authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), ShipmentController.export);
 
-router.post('/upload', upload.single('file'), ShipmentController.uploadCSV);
+router.post('/upload', authenticate, upload.single('file'), ShipmentController.uploadCSV);
 
 // Viewer, Operations, and Admin can read shipments 
 router.get("/", authenticate, authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), ShipmentController.getAll);

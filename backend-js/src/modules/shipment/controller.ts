@@ -4,18 +4,27 @@ import { createShipmentSchema, getShipmentsQuerySchema, updateStatusSchema } fro
 
 export class ShipmentController {
 
-  static async create(req: Request, res: Response) {
-    try {
-      const userId = (req as any).user?.id;
-      const validData = createShipmentSchema.parse(req.body);
+  // backend-js\src\modules\shipment\controller.ts
 
-      const result = await ShipmentService.createShipment(validData, userId);
-      return res.status(201).json({ message: "Shipment created successfully", id: result.id });
-    } catch (error: any) {
-      if (error.message === "Duplicate shipment_id") return res.status(400).json({ error: error.message });
-      return res.status(400).json({ errors: error.errors });
+static async create(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user?.id;
+    const validData = createShipmentSchema.parse(req.body);
+
+    const result = await ShipmentService.createShipment(validData, userId);
+    return res.status(201).json({ message: "Shipment created successfully", id: result.id });
+  } catch (error: any) {
+    // If it's a Zod validation error
+    if (error.errors) {
+      return res.status(400).json({ 
+        message: error.errors.map((e: any) => e.message).join(", "),
+        errors: error.errors 
+      });
     }
+    // If it's a manual error from the Service (like "Duplicate shipment_id")
+    return res.status(400).json({ error: error.message });
   }
+}
 
   static async getAll(req: Request, res: Response) {
     try {

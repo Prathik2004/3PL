@@ -43,25 +43,28 @@ app.use('/api/shipments', shipmentRoutes);
 app.use('/api/exceptions', exceptionRoutes);
 
 // Global Error Handler
+// Look for this at the bottom of src/index.ts
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running successfully on http://localhost:${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/health`);
-});
-
-const startServer = async () => {
-  await connectDB();
-
-  // Start cron AFTER DB connected
-  runExceptionTracker();
-
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+  console.error("DEBUG - Error caught in Global Handler:", err); // ADD THIS LINE
+  res.status(err.status || 400).json({ 
+    message: err.message || "Internal Server Error",
+    error: err.error || err // Include the raw error for debugging
   });
-};
+});
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  const startServer = async () => {
+    try {
+      await connectDB();
+      runExceptionTracker();
+      app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+      });
+    } catch (err) {
+      console.error("Failed to start server:", err);
+    }
+  };
+  startServer();
+}
+
+export default app;
