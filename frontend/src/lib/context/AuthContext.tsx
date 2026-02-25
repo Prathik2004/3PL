@@ -10,12 +10,16 @@ export interface User {
   email: string;
   role: string | "Admin" | "Operations" | "Viewer";
 }
+export interface login {
+  email: string;
+  password: string
+}
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
+  login: (payload: login) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -42,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (payload: LoginPayload) => {
+  const login = async (payload: login) => {
     try {
       const tokens = await authService.login(payload);
       

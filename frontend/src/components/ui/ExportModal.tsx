@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 import React, { useEffect, useState } from 'react';
 import BasicButton from './BasicButton';
 import { motion } from "motion/react"
@@ -26,6 +26,7 @@ export const ExportModal = ({ onClose, onExport }: ExportModalProps) => {
   }, [onClose]);
 
   const [format, setFormat] = useState<'csv' | 'excel'>('csv');
+  
 
   return (
     <div onClick={onClose} className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-100'>

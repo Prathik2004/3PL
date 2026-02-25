@@ -6,28 +6,24 @@ import { useEffect, useState } from "react"
 import { motion } from "motion/react"
 import { shipmentService } from "@/src/services/shipmentService"
 
-
 const BulkUploadModal = ({ onClose }: ModalProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BulkUploadResponse | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // CLOSING MODAL WHEN esc IS HIT
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
-
     window.addEventListener("keydown", handleEsc);
-
-    // cleanup to avoid memory leaks
     return () => {
       window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -48,6 +44,7 @@ const BulkUploadModal = ({ onClose }: ModalProps) => {
       setFile(selectedFile);
     }
   };
+
 
   const handleUpload = async () => {
     if (!file) {
