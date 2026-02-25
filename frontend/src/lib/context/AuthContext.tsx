@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { LoginPayload } from "../../../../shared/types/auth.types";
+import { LoginPayload } from "../../types/auth.types";
 import { authService } from "../services/auth.service";
 import { AppApiError } from "../errors/AppError";
 
