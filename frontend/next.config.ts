@@ -12,10 +12,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-
-  experimental: {
-    externalDir: true,
-  }
 };
 
 export default nextConfig;
