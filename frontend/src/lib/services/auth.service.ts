@@ -1,5 +1,5 @@
 import { apiClient } from "../api/client";
-import { LoginPayload, AuthTokens } from "../../../../shared/types/auth.types";
+import { LoginPayload, AuthTokens } from "../../types/auth.types";
 
 export const authService = {
   /**
