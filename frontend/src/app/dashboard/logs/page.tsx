@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  Search,
-  Calendar,
-  Filter,
-  Cpu,
-  CheckCircle2,
-  XCircle,
-  ChevronDown,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import ExportButton from "@/src/components/ui/ExportButton";
 import Pagination from "@/src/components/ui/Pagination";
 import Image from "next/image";
@@ -162,7 +154,7 @@ export default function LogsPage() {
   return (
     <div className="flex flex-col gap-6" style={{ fontFamily: 'Inter' }}>
       {/* Header Section */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-end justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-[32px] font-bold text-[#0F172A] tracking-tight">System Logs</h1>
           <p className="text-[#64748B] text-[16px] font-medium opacity-90">
@@ -248,10 +240,10 @@ export default function LogsPage() {
                     <span
                       className={`inline-flex items-center px-4 py-1.5 rounded-full text-[12.5px] font-bold ${log.status === "Success"
                         ? "bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
-                          : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
+                        : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
                         }`}
                     >
-                          {log.status}
+                      {log.status}
                     </span>
                   </td>
                 </tr>
