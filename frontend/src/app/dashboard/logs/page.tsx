@@ -5,7 +5,6 @@ import {
   Search,
   Calendar,
   Filter,
-  User,
   Cpu,
   CheckCircle2,
   XCircle,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import ExportButton from "@/src/components/ui/ExportButton";
 import Pagination from "@/src/components/ui/Pagination";
+import Image from "next/image";
 
 // Local Filter Dropdown to match the design exactly as shown in the image
 interface FilterOption {
@@ -222,9 +222,9 @@ export default function LogsPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center border border-slate-100/50">
                         {log.type === "system" ? (
-                          <Cpu className="h-4 w-4 text-[#64748B]" />
+                          <Image src="/icons/cpu.svg" alt="CPU" width={18} height={18} />
                         ) : (
-                          <User className="h-4 w-4 text-[#64748B]" />
+                          <Image src="/icons/avatar-icon.svg" alt="Avatar" width={18} height={18} />
                         )}
                       </div>
                       <span className="text-[14.5px] font-bold text-[#0F172A]">

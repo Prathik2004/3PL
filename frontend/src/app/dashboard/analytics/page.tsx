@@ -4,7 +4,7 @@ import { FilterBar } from "@/src/components/common/FilterBar";
 import { CarrierVolumeCard } from "@/src/components/analytics/CarrierVolumeCard";
 import { MonthlyExceptionHeatmap } from "@/src/components/analytics/CalendarHeatmap";
 import { ChartAreaInteractive } from "@/src/components/analytics/AreaChart";
-import { ANALYTICS_METRICS } from "@/src/utils/mockData";
+import { ANALYTICS_METRICS } from "@/src/constants/mockData";
 
 export default function AnalyticsPage() {
   return (
