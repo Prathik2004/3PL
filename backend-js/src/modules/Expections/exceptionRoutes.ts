@@ -4,6 +4,7 @@ import {
   getExceptionsByShipment,
   resolveException,
   createException,
+  getExceptionsSummary,
 } from "./exceptionController";
 
 import { authorizeRoles } from "../../middleware/rbac";
@@ -11,6 +12,14 @@ import { UserRole } from "../../types";
 import { authenticate } from "../../middleware/authenticate";
 
 const router = Router();
+
+// Summary counts grouped by exception_type (for KPI cards)
+router.get(
+  "/summary",
+  authenticate,
+  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+  getExceptionsSummary
+);
 
 // Get all exceptions, optional filter by resolved
 router.get(

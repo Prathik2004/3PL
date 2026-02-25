@@ -76,8 +76,8 @@ export const getExceptionsByShipment = async (req: Request, res: Response) => {
  */
 export const resolveException: RequestHandler = async (req, res) => {
   try {
-     const { id } = req.params as { id: string };
-     const { resolution_note } = req.body as { resolution_note?: string };
+    const { id } = req.params as { id: string };
+    const { resolution_note } = req.body as { resolution_note?: string };
 
     const exception = await resolveExceptionService(id, resolution_note);
 
@@ -133,6 +133,39 @@ export const createException = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Create Exception Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * GET /api/exceptions/summary
+ * Returns count of unresolved exceptions grouped by exception_type.
+ */
+export const getExceptionsSummary = async (req: Request, res: Response) => {
+  try {
+    const groups = await Exception.aggregate([
+      { $match: { resolved: false } },
+      { $group: { _id: "$exception_type", count: { $sum: 1 } } },
+    ]);
+
+    const summary: Record<string, number> = {
+      NoUpdate: 0,
+      MissingPOD: 0,
+      Delay: 0,
+      NotDispatched: 0,
+    };
+
+    let total = 0;
+    for (const g of groups) {
+      if (g._id in summary) {
+        summary[g._id] = g.count;
+      }
+      total += g.count;
+    }
+
+    return res.status(200).json({ ...summary, total });
+  } catch (error: any) {
+    console.error("Get Exceptions Summary Error:", error);
     return res.status(500).json({ error: error.message });
   }
 };

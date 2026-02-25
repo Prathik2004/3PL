@@ -1,21 +1,40 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import ExceptionCard from "@/src/components/ui/Dashboard/ExceptionCard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 import { FilterBar } from "@/src/components/common/FilterBar";
 import { RefreshCwOff, FileText, CalendarX, ClipboardList } from "lucide-react";
+import { apiClient } from "@/src/lib/api/client";
 
-export const metadata = {
-  title: "Exceptions Dashboard | Walkwel 3PL",
-  description: "View and resolve active shipment exceptions",
-};
+interface ExceptionSummary {
+  NoUpdate: number;
+  MissingPOD: number;
+  Delay: number;
+  NotDispatched: number;
+  total: number;
+}
 
 export default function ExceptionsDashboard() {
+  const [summary, setSummary] = useState<ExceptionSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient<ExceptionSummary>("/exceptions/summary")
+      .then(setSummary)
+      .catch((err) => console.error("Failed to load exception summary:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const count = (val: number | undefined) =>
+    loading ? 0 : (val ?? 0);
+
   return (
     <div className="w-full bg-[#FFFFFF] p-6 lg:p-10 space-y-8 min-h-full">
       {/* Page Header */}
       <div>
         <h1 className="text-[28px] font-bold text-[#0F172A] mb-2 tracking-tight">
-          Active Exceptions (24)
+          Active Exceptions {!loading && `(${summary?.total ?? 0})`}
         </h1>
         <p className="text-[15px] font-medium text-slate-500">
           Review and resolve shipment delays and missing documentation.
@@ -26,25 +45,25 @@ export default function ExceptionsDashboard() {
       <div className="flex flex-nowrap lg:flex-row gap-4 overflow-x-auto pb-4 lg:pb-0">
         <ExceptionCard
           title="No Update"
-          count={8}
+          count={count(summary?.NoUpdate)}
           severity="warning"
           icon={RefreshCwOff}
         />
         <ExceptionCard
           title="Missing POD"
-          count={12}
+          count={count(summary?.MissingPOD)}
           severity="warning"
           icon={FileText}
         />
         <ExceptionCard
           title="Critical Delay"
-          count={3}
+          count={count(summary?.Delay)}
           severity="critical"
           icon={CalendarX}
         />
         <ExceptionCard
           title="Not Dispatched"
-          count={1}
+          count={count(summary?.NotDispatched)}
           severity="neutral"
           icon={ClipboardList}
         />
@@ -58,7 +77,7 @@ export default function ExceptionsDashboard() {
           </Suspense>
         </div>
 
-        {/* Shipment Table */}
+        {/* Shipment Table — only rows with active exceptions */}
         <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-2xl bg-slate-100" />}>
           <ShipmentTable onlyExceptions={true} />
         </Suspense>
@@ -66,4 +85,3 @@ export default function ExceptionsDashboard() {
     </div>
   );
 }
-

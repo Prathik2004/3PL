@@ -1,30 +1,32 @@
 import { Request, Response } from 'express';
 import { ShipmentService } from './service';
-import { createShipmentSchema, getShipmentsQuerySchema, updateStatusSchema } from './validator';
+import { Shipment } from '../../models/shipment';
+import { createShipmentSchema, updateStatusSchema } from './validator';
+import { ShipmentStatus } from '../../types';
 
 export class ShipmentController {
 
   // backend-js\src\modules\shipment\controller.ts
 
-static async create(req: Request, res: Response) {
-  try {
-    const userId = (req as any).user?.id;
-    const validData = createShipmentSchema.parse(req.body);
+  static async create(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user?.id;
+      const validData = createShipmentSchema.parse(req.body);
 
-    const result = await ShipmentService.createShipment(validData, userId);
-    return res.status(201).json({ message: "Shipment created successfully", id: result.id });
-  } catch (error: any) {
-    // If it's a Zod validation error
-    if (error.errors) {
-      return res.status(400).json({ 
-        message: error.errors.map((e: any) => e.message).join(", "),
-        errors: error.errors 
-      });
+      const result = await ShipmentService.createShipment(validData, userId);
+      return res.status(201).json({ message: "Shipment created successfully", id: result.id });
+    } catch (error: any) {
+      // If it's a Zod validation error
+      if (error.errors) {
+        return res.status(400).json({
+          message: error.errors.map((e: any) => e.message).join(", "),
+          errors: error.errors
+        });
+      }
+      // If it's a manual error from the Service (like "Duplicate shipment_id")
+      return res.status(400).json({ error: error.message });
     }
-    // If it's a manual error from the Service (like "Duplicate shipment_id")
-    return res.status(400).json({ error: error.message });
   }
-}
 
   static async getAll(req: Request, res: Response) {
     try {
@@ -116,6 +118,54 @@ static async create(req: Request, res: Response) {
         res.attachment(`shipments_${Date.now()}.xlsx`);
         return res.send(data);
       }
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  /** GET /api/shipments/clients — distinct client names for filter bar */
+  static async getClients(req: Request, res: Response) {
+    try {
+      const clients: string[] = await Shipment.distinct('client_name');
+      return res.status(200).json({ data: clients.filter(Boolean).sort() });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  /** GET /api/shipments/carriers — distinct carrier names for filter bar */
+  static async getCarriers(req: Request, res: Response) {
+    try {
+      const carriers: string[] = await Shipment.distinct('carrier_name');
+      return res.status(200).json({ data: carriers.filter(Boolean).sort() });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/shipments/trends?days=90
+   * Returns daily shipment counts and active user placeholders for the Analytics AreaChart.
+   */
+  static async getTrends(req: Request, res: Response) {
+    try {
+      const days = parseInt(req.query.days as string) || 90;
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+
+      const groups = await Shipment.aggregate([
+        { $match: { created_at: { $gte: since }, status: { $ne: ShipmentStatus.CANCELLED } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+        { $project: { _id: 0, date: '$_id', orders: 1 } },
+      ]);
+
+      return res.status(200).json({ data: groups });
     } catch (error: any) {
       return res.status(500).json({ error: error.message });
     }

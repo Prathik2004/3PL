@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { apiClient } from "@/src/lib/api/client"
 
 import {
   Card,
@@ -28,13 +29,10 @@ import {
 
 export const description = "An interactive area chart for system activity"
 
-// Mock data updated for Users vs Orders
-const chartData = [
-  { date: "2026-04-01", orders: 222, users: 150 },
-  { date: "2026-04-02", orders: 97, users: 180 },
-  // ... (Full data set would be mapped from backend)
-  { date: "2026-06-30", orders: 446, users: 400 },
-]
+interface TrendPoint {
+  date: string;
+  orders: number;
+}
 
 const chartConfig = {
   activity: {
@@ -42,30 +40,29 @@ const chartConfig = {
   },
   orders: {
     label: "Active Orders",
-    color: "var(--chart-1)", // Green/Success per SRS theme
-  },
-  users: {
-    label: "Active Users",
-    color: "var(--chart-2)", // Blue/Standard theme
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
 export function ChartAreaInteractive() {
   const [timeRange, setTimeRange] = React.useState("90d")
+  const [allData, setAllData] = React.useState<TrendPoint[]>([])
+  const [loading, setLoading] = React.useState(true)
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2026-06-30") // Current context 2026
-    let daysToSubtract = 90
-    if (timeRange === "30d") {
-      daysToSubtract = 30
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
-    }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+  React.useEffect(() => {
+    apiClient<{ data: TrendPoint[] }>("/shipments/trends?days=90")
+      .then((res) => setAllData(res.data))
+      .catch((err) => console.error("Failed to load trends:", err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const filteredData = React.useMemo(() => {
+    const days = timeRange === "30d" ? 30 : timeRange === "7d" ? 7 : 90
+    if (allData.length === 0) return []
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - days)
+    return allData.filter((d) => new Date(d.date) >= cutoff)
+  }, [allData, timeRange])
 
   return (
     <Card className="pt-0">
@@ -73,7 +70,7 @@ export function ChartAreaInteractive() {
         <div className="grid flex-1 gap-1">
           <CardTitle>Operations Visibility</CardTitle>
           <CardDescription>
-            Comparing active users vs. shipment orders
+            Active shipment orders over time
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
@@ -97,83 +94,73 @@ export function ChartAreaInteractive() {
         </Select>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <AreaChart data={filteredData}>
-            <defs>
-              <linearGradient id="fillOrders" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-orders)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-orders)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-users)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-users)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  }}
-                  indicator="dot"
-                />
-              }
-            />
-            <Area
-              dataKey="users"
-              type="natural"
-              fill="url(#fillUsers)"
-              stroke="var(--color-users)"
-              stackId="a"
-            />
-            <Area
-              dataKey="orders"
-              type="natural"
-              fill="url(#fillOrders)"
-              stroke="var(--color-orders)"
-              stackId="a"
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </AreaChart>
-        </ChartContainer>
+        {loading ? (
+          <div className="aspect-auto h-[250px] w-full flex items-center justify-center text-slate-400 text-sm">
+            Loading chart data…
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="aspect-auto h-[250px] w-full flex items-center justify-center text-slate-400 text-sm">
+            No shipment data for this period.
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <AreaChart data={filteredData}>
+              <defs>
+                <linearGradient id="fillOrders" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-orders)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-orders)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) => {
+                      return new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    }}
+                    indicator="dot"
+                  />
+                }
+              />
+              <Area
+                dataKey="orders"
+                type="natural"
+                fill="url(#fillOrders)"
+                stroke="var(--color-orders)"
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </AreaChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )
