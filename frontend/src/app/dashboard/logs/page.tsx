@@ -166,7 +166,7 @@ export default function LogsPage() {
       {/* Filter Bar */}
       <div className="w-full bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col md:flex-row items-center gap-4">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] h-4 w-4 transition-colors group-focus-within:text-[#0F172A]" />
+          <img src="/icons/search.svg" alt="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] h-4 w-4 transition-colors group-focus-within:text-[#0F172A]" />
           <input
             type="text"
             placeholder="Search logs by user, event, or keyword"
@@ -177,13 +177,13 @@ export default function LogsPage() {
         </div>
         <div className="flex items-center gap-3">
           <FilterDropdown
-            icon={<Calendar className="h-4 w-4" />}
+            icon={<img src="/icons/calendar.svg" alt="Calendar" className="h-4 w-4" />}
             value={dateFilter}
             options={dateOptions}
             onChange={setDateFilter}
           />
           <FilterDropdown
-            icon={<Filter className="h-4 w-4" />}
+            icon={<img src="/icons/filter.svg" alt="Filter" className="h-4 w-4" />}
             label="Event Type"
             value={eventType}
             options={eventTypeOptions}
@@ -242,11 +242,6 @@ export default function LogsPage() {
                         : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
                         }`}
                     >
-                      {log.status === "Success" ? (
-                        <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                      ) : (
-                        <XCircle className="mr-2 h-3.5 w-3.5" />
-                      )}
                       {log.status}
                     </span>
                   </td>
