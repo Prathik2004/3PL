@@ -8,7 +8,7 @@ import EditShipmentModal from "../EditShipmentModal";
 import { AnimatePresence } from "motion/react";
 
 
-const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, origin, alertColor = "None" }: ShipmentRowProps) => {
+const ShipmentRow = ({ shipmentId, internalId, client, lastUpdated, carrier, dest, expDel, alert, status, origin, alertColor = "None" }: ShipmentRowProps) => {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -21,10 +21,11 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
           ? "bg-white hover:bg-slate-50"
           : "bg-[#FFE8E8] hover:bg-[#FEE2E2]"
         } grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 border-b border-[#E2E8F0] cursor-pointer transition-colors duration-150`}>
-      <AnimatePresence >
+      <AnimatePresence>
 
         {editModalOpen && <EditShipmentModal
           shipmentId={shipmentId}
+          internalId={internalId}
           client={client}
           carrier={carrier}
           dest={dest}
@@ -32,8 +33,9 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
           origin={origin}
           onClose={() => setEditModalOpen(false)} />}
 
-        {deleteModalOpen && <DeleteModal shipmentId={shipmentId} onClose={() => setDeleteModalOpen(false)} />}
+        {deleteModalOpen && <DeleteModal shipmentId={internalId} onClose={() => setDeleteModalOpen(false)} />}
       </AnimatePresence>
+
 
       {/* SHIPMENTID & CLIENT */}
       <div className="flex flex-col py-3">

@@ -56,7 +56,9 @@ const ShipmentTable = ({ onlyExceptions = false }: ShipmentTableProps) => {
           }
 
           return {
-            shipmentId: s.shipment_id, // Mapping DB field to UI prop
+            shipmentId: s.shipment_id,   // Human-readable
+            internalId: s.id,            // UUID for PUT/DELETE API
+            _mongoId: s._id?.toString(), // MongoDB ObjectId for exception lookup
             client: s.client_name,
             lastUpdated: s.updated_at ? formatTimeAgo(s.updated_at) : "-",
             carrier: s.carrier_name,

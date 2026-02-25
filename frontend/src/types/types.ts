@@ -4,12 +4,13 @@ export interface StatusIconProps {
 }
 
 export interface ShipmentRowProps {
-  shipmentId: string;
+  shipmentId: string;      // Human-readable e.g. "SHP-001"
+  internalId: string;      // UUID used for PUT/DELETE API calls
+  _mongoId?: string;       // MongoDB _id for exception lookups
   client: string;
   lastUpdated: string;
   carrier: string;
   dest: string;
-  // expDel: Date;
   expDel: string
   alert: string;
   alertColor?: "Yellow" | "Red" | "None";
@@ -24,6 +25,8 @@ export interface ModalProps {
 // --- API Types ---
 
 export interface ShipmentResponse {
+  id: string;           // UUID from backend (used for PUT/DELETE)
+  _id?: string;         // MongoDB ObjectId
   shipment_id: string;
   client_name: string;
   origin: string;
