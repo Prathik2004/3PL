@@ -14,6 +14,7 @@ const VALID_STRUCTURE = {
 const srcPath = path.resolve(__dirname, '../src');
 
 function validate() {
+  console.log("🚀 HUSKY IS RUNNING VALIDATION...");
   console.log(`\n🔍 Checking: ${srcPath}`);
 
   if (!fs.existsSync(srcPath)) {
