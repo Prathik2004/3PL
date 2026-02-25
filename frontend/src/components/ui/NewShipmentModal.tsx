@@ -6,6 +6,7 @@ import { ModalProps, CreateShipmentPayload } from "@/src/types/types"
 import { motion } from "motion/react"
 import { useEffect, useState } from "react"
 import BasicDropDownInput from "./BasicDropDownInput"
+import PODReceived from "./PODReceived"
 
 type StatusProps="Created" | "Dispatched" | "Delayed" | "Delivered" | "In Transit"
 
@@ -138,12 +139,7 @@ const originDestinationOptions = [
     </div>
     {/* MODAL FOOTER */}
     <div className="bg-[#E2E8F0] flex items-center justify-between rounded-b-xl py-5 px-8">
-      <div className="flex items-center justify-center gap-2">
-        <div className="w-10 h-5 bg-[#64748B] rounded-full relative z-5 flex items-center justify-start">
-          <span className="w-5 h-5 rounded-full bg-white absolute z-10" />
-        </div>
-        <span className="text-[12px] text-[#64748B]">POD Received</span>
-      </div>
+      < PODReceived />
       <div className="flex items-center justify-center gap-2">
         <BasicButton onClick={onClose} className="text-black bg-white border border-[#E2E8F0] py-2 px-4 rounded-lg cursor-pointer" text="Cancel" />
         <BasicButton className="bg-black text-white py-2 px-4 rounded-lg cursor-pointer" text="Create Shipment" />
