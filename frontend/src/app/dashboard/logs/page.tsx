@@ -49,7 +49,7 @@ const FilterDropdown = ({ icon, label, value, options, onChange }: FilterDropdow
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{ fontFamily: 'Inter' }}
-        className="h-11 px-4 bg-white border border-[#E2E8F0] rounded-xl flex items-center gap-2 hover:bg-slate-50 transition-colors cursor-pointer"
+        className="h-11 px-4 bg-white border border-[#E2E8F0] rounded-xl flex items-center gap-2 hover:bg-slate-50 transition-colors cursor-pointer outline-none"
       >
         <span className="text-[#94A3B8]">{icon}</span>
         {label && <span className="text-[14px] font-medium text-[#64748B]">{label}:</span>}
@@ -58,7 +58,7 @@ const FilterDropdown = ({ icon, label, value, options, onChange }: FilterDropdow
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] right-0 w-[200px] bg-white border border-[#E2E8F0] rounded-xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] z-50 py-2 border-slate-100">
+        <div className="absolute top-[calc(100%+8px)] right-0 w-[200px] bg-white border border-[#E2E8F0] rounded-xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] z-50 py-2">
           {options.map((option) => (
             <button
               key={option.value}
@@ -150,6 +150,15 @@ export default function LogsPage() {
     { label: "Security", value: "security" },
   ];
 
+  // Filtering Logic
+  const filteredLogs = mockLogs.filter((log) => {
+    const matchesSearch =
+      log.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.action.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = eventType === "all" || log.type === eventType;
+    return matchesSearch && matchesType;
+  });
+
   return (
     <div className="flex flex-col gap-6" style={{ fontFamily: 'Inter' }}>
       {/* Header Section */}
@@ -213,7 +222,7 @@ export default function LogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
-              {mockLogs.map((log, index) => (
+              {filteredLogs.map((log, index) => (
                 <tr key={index} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-6 text-[14px] text-[#64748B] font-medium">
                     {log.timestamp}
@@ -239,10 +248,10 @@ export default function LogsPage() {
                     <span
                       className={`inline-flex items-center px-4 py-1.5 rounded-full text-[12.5px] font-bold ${log.status === "Success"
                         ? "bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
-                        : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
+                          : "bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]"
                         }`}
                     >
-                      {log.status}
+                          {log.status}
                     </span>
                   </td>
                 </tr>
@@ -254,12 +263,12 @@ export default function LogsPage() {
         {/* Footer */}
         <div className="flex items-center justify-between px-10 py-6 border-t border-[#E2E8F0] bg-white">
           <span className="text-[14px] text-[#64748B] font-medium">
-            Showing <span className="text-[#0F172A] font-bold">1 to 6</span> of{" "}
-            <span className="text-[#0F172A] font-bold">256</span> logs
+            Showing <span className="text-[#0F172A] font-bold">1 to {filteredLogs.length}</span> of{" "}
+            <span className="text-[#0F172A] font-bold">{filteredLogs.length}</span> logs
           </span>
           <Pagination
             currentPage={currentPage}
-            totalPages={37}
+            totalPages={1}
             onPageChange={setCurrentPage}
           />
         </div>
