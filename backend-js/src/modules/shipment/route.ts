@@ -16,10 +16,10 @@ router.post('/upload', authenticate, upload.single('file'), ShipmentController.u
 // Viewer, Operations, and Admin can read shipments 
 router.get("/", authenticate, authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), ShipmentController.getAll);
 
-// Only Operations and Admin can create shipments 
+// Only Admin can create shipments 
 router.post('/',
     authenticate,
-    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    authorizeRoles(UserRole.ADMIN),
     ShipmentController.create
 );
 
@@ -33,7 +33,7 @@ router.put('/:id/status',
 // Soft delete (Cancel) - Only Operations and Admin
 router.delete('/:id',
     authenticate,
-    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    authorizeRoles(UserRole.ADMIN),
     ShipmentController.delete
 );
 router.get('/stats',

@@ -93,6 +93,7 @@ export class ShipmentService {
 
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
             query.created_by = userId;
+            query.status = { $ne: ShipmentStatus.CANCELLED };
         }
 
         if (filters.status) query.status = filters.status;
