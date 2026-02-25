@@ -1,6 +1,11 @@
-shipment_id,client_name,origin,destination,dispatch_date,expected_delivery_date,carrier_name,created_by
-BULK-V1-001,Tesla Inc,Austin TX,Berlin DE,2026-03-01,2026-03-15,DHL,699c436d792631af49f83d4a
-BULK-V1-002,Apple,Cupertino CA,Mumbai IN,2026-03-02,2026-03-07,FedEx,699c436d792631af49f83d4a
-BULK-V1-003,Amazon,Seattle WA,London UK,2026-03-05,2026-03-10,UPS,699c436d792631af49f83d4a
-BULK-V1-004,Samsung,Seoul KR,Delhi IN,2026-03-04,2026-03-12,BlueDart,699c436d792631af49f83d4a
-BULK-V1-005,Inditex,Madrid ES,Dubai AE,2026-03-10,2026-03-14,Maersk,699c436d792631af49f83d4a
+shipment_id,client_name,origin,destination,dispatch_date,expected_delivery_date,carrier_name
+SHIP-NY-9001,Global Tech Solutions,New York,London,2026-03-01,2026-03-05,FedEx
+SHIP-LN-4421,Green Earth Foods,London,Berlin,2026-03-02,2026-03-04,DHL
+SHIP-TK-1182,Nippon Electronics,Tokyo,San Francisco,2026-03-05,2026-03-12,UPS
+SHIP-MU-7730,Reliance Retail,Mumbai,Dubai,2026-03-01,2026-03-04,BlueDart
+SHIP-SY-2291,Ozzie Exports,Sydney,Singapore,2026-03-10,2026-03-15,Maersk
+SHIP-DB-5562,Desert Sands Trading,Dubai,Paris,2026-03-03,2026-03-08,DHL
+SHIP-SG-8810,Lion City Logistics,Singapore,Hong Kong,2026-03-04,2026-03-06,FedEx
+SHIP-BR-3347,EuroAuto Parts,Berlin,Madrid,2026-03-07,2026-03-10,UPS
+SHIP-CH-6621,Windy City Wholesalers,Chicago,Toronto,2026-03-02,2026-03-03,FedEx
+SHIP-HK-9923,Pacific Rim Goods,Hong Kong,Sydney,2026-03-12,2026-03-20,Maersk

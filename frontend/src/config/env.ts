@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NEXT_PUBLIC_ACTIVE_BACKEND: z.enum(["js", "php", "python"]).default("js"),
-  NEXT_PUBLIC_BACKEND_JS_URL: z.string().url().default("http://backend-js.3utilities.com:8080/api"),
+  NEXT_PUBLIC_BACKEND_JS_URL: z.string().url().default("http://localhost:3000/api"),
   NEXT_PUBLIC_BACKEND_PHP_URL: z.string().url().default("http://localhost:8000/api"),
   NEXT_PUBLIC_BACKEND_PYTHON_URL: z.string().url().default("http://localhost:5000/api"),
 });

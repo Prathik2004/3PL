@@ -8,7 +8,9 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "prepare": "husky",
+    "validate": "node scripts/validate-structure.js"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +42,7 @@
     "csv-parser": "^3.2.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.2",

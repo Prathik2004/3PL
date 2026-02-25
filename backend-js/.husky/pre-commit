@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "🔍 Validating backend-js folder structure..."
+
+# Move into the backend folder first, then run the script
+cd backend-js && node scripts/validate-structure.js
