@@ -42,7 +42,7 @@ app.get("/health", (req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/shipments', shipmentRoutes);
-// (Ensure exceptionRoutes is used if needed: app.use('/api/exceptions', exceptionRoutes); )
+ app.use('/api/exceptions', exceptionRoutes); 
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
