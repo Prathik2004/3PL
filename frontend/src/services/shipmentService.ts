@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { apiClient } from "../lib/api/client";
 import {
   PaginatedShipments,
   CreateShipmentPayload,
@@ -16,26 +16,23 @@ export interface DashboardStats {
 
 export const shipmentService = {
   // GET /api/shipments
-  getAllShipments: async (page: number, limit: number, filters: any) => {
-        // FIX: Build query string manually for apiFetch
+  getAllShipments: async (page: number, limit: number, filters: Record<string, string>) => {
         const params = new URLSearchParams({
             page: page.toString(),
             limit: limit.toString(),
             ...filters
         });
         
-        const response = await apiFetch<PaginatedShipments>(`/shipments?${params.toString()}`);
-        return response;
+        return apiClient<PaginatedShipments>(`/shipments?${params.toString()}`);
     },
 
     getStats: async (): Promise<DashboardStats> => {
-        const response = await apiFetch<DashboardStats>('/shipments/stats');
-        return response;
+        return apiClient<DashboardStats>('/shipments/stats');
     },
 
   // POST /api/shipments
   createShipment: async (payload: CreateShipmentPayload): Promise<{ message: string; id: string }> => {
-    return apiFetch<{ message: string; id: string }>("/shipments", {
+    return apiClient<{ message: string; id: string }>("/shipments", {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -46,9 +43,10 @@ export const shipmentService = {
     const formData = new FormData();
     formData.append("file", file);
 
-    return apiFetch<BulkUploadResponse>("/shipments/upload", {
+    return apiClient<BulkUploadResponse>("/shipments/upload", {
       method: "POST",
       body: formData,
+      isForm: true, // Tell client not to force application/json
     });
   },
 
@@ -57,7 +55,7 @@ export const shipmentService = {
     id: string,
     payload: UpdateShipmentStatusPayload
   ): Promise<{ id: string; status: string; last_status_update: string }> => {
-    return apiFetch<{ id: string; status: string; last_status_update: string }>(`/shipments/${id}/status`, {
+    return apiClient<{ id: string; status: string; last_status_update: string }>(`/shipments/${id}/status`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
@@ -65,7 +63,7 @@ export const shipmentService = {
 
   // DELETE /api/shipments/:id
   cancelShipment: async (id: string): Promise<{ id: string; status: string }> => {
-    return apiFetch<{ id: string; status: string }>(`/shipments/${id}`, {
+    return apiClient<{ id: string; status: string }>(`/shipments/${id}`, {
       method: "DELETE",
     });
   },
