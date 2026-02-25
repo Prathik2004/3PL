@@ -79,11 +79,11 @@ router.put(
     ShipmentController.updateStatus
 );
 
-// Soft delete (Cancel) — Admin only
+// Soft delete (Cancel) — Admin and Operations
 router.delete(
     '/:id',
     authenticate,
-    authorizeRoles(UserRole.ADMIN),
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
     ShipmentController.delete
 );
 

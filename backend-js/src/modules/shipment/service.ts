@@ -93,11 +93,46 @@ export class ShipmentService {
 
         if (userRole !== UserRole.ADMIN && userRole !== UserRole.OPERATIONS) {
             query.created_by = userId;
-            query.status = { $ne: ShipmentStatus.CANCELLED };
         }
 
-        if (filters.status) query.status = filters.status;
-        if (filters.client) query.client_name = { $regex: filters.client, $options: 'i' };
+        // --- Filters ---
+        if (filters.status) {
+            // Status filter overrides the base $ne: CANCELLED
+            query.status = filters.status;
+        }
+        if (filters.client) {
+            query.client_name = { $regex: filters.client, $options: 'i' };
+        }
+        if (filters.carrier) {
+            query.carrier_name = { $regex: filters.carrier, $options: 'i' };
+        }
+        if (filters.search) {
+            query.$or = [
+                { shipment_id: { $regex: filters.search, $options: 'i' } },
+                { client_name: { $regex: filters.search, $options: 'i' } },
+                { carrier_name: { $regex: filters.search, $options: 'i' } },
+            ];
+        }
+
+        // --- Exception filter: only shipments WITH an active exception ---
+        let restrictToIds: any[] | null = null;
+        if (filters.exception && filters.exception !== 'all') {
+            const exFilter: any = { resolved: false };
+            if (filters.exception !== 'any') {
+                // Map frontend value to the DB exception_type
+                const typeMap: Record<string, string> = {
+                    'no_update': 'NoUpdate',
+                    'missing_pod': 'MissingPOD',
+                    'critical_delay': 'Delay',
+                    'not_dispatched': 'NotDispatched',
+                };
+                const dbType = typeMap[filters.exception] || filters.exception;
+                exFilter.exception_type = dbType;
+            }
+            const exShipments = await Exception.find(exFilter).select('shipment_id').lean();
+            restrictToIds = exShipments.map((e: any) => e.shipment_id);
+            query._id = { $in: restrictToIds };
+        }
 
         // 1. Fetch Shipments
         const [shipments, total] = await Promise.all([
@@ -109,7 +144,7 @@ export class ShipmentService {
             Shipment.countDocuments(query)
         ]);
 
-        // 2. Fetch Unresolved Exceptions
+        // 2. Fetch Unresolved Exceptions for this page's shipments
         const shipmentIds = shipments.map(s => s._id);
         const activeExceptions = await Exception.find({
             shipment_id: { $in: shipmentIds },
@@ -120,7 +155,6 @@ export class ShipmentService {
         const data = shipments.map(shipment => ({
             ...shipment,
             active_exception: activeExceptions.find(
-                // FIX: Added (ex: any) to resolve implicit any error
                 (ex: any) => ex.shipment_id.toString() === shipment._id.toString()
             ) || null
         }));

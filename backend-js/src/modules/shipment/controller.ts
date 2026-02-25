@@ -3,27 +3,31 @@ import { ShipmentService } from './service';
 import { Shipment } from '../../models/shipment';
 import { createShipmentSchema, updateStatusSchema } from './validator';
 import { ShipmentStatus } from '../../types';
+import { createAuditLog } from '../../utils/auditLogger';
 
 export class ShipmentController {
 
   // backend-js\src\modules\shipment\controller.ts
 
   static async create(req: Request, res: Response) {
+    const userId = (req as any).user?.id;
+    const userRole = (req as any).user?.role;
     try {
-      const userId = (req as any).user?.id;
       const validData = createShipmentSchema.parse(req.body);
-
       const result = await ShipmentService.createShipment(validData, userId);
+      await createAuditLog({
+        user_id: userId, user_role: userRole,
+        action: `Created shipment ${validData.shipment_id}`,
+        status: 'Success', event_type: 'user', ip_address: req.ip,
+      });
       return res.status(201).json({ message: "Shipment created successfully", id: result.id });
     } catch (error: any) {
-      // If it's a Zod validation error
       if (error.errors) {
         return res.status(400).json({
           message: error.errors.map((e: any) => e.message).join(", "),
           errors: error.errors
         });
       }
-      // If it's a manual error from the Service (like "Duplicate shipment_id")
       return res.status(400).json({ error: error.message });
     }
   }
@@ -34,7 +38,15 @@ export class ShipmentController {
       const userRole = (req as any).user?.role;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const filters = { status: req.query.status, client: req.query.client };
+
+      // Forward ALL filter params to the service
+      const filters = {
+        status: req.query.status as string | undefined,
+        client: req.query.client as string | undefined,
+        carrier: req.query.carrier as string | undefined,
+        exception: req.query.exception as string | undefined,
+        search: req.query.search as string | undefined,
+      };
 
       const result = await ShipmentService.getShipments(filters, page, limit, userId, userRole);
       return res.status(200).json(result);

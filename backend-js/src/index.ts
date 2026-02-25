@@ -5,10 +5,11 @@ import cors from "cors";
 import dns from "dns";
 
 import connectDB from './config/database';
-import shipmentRoutes from './modules/shipment/route'; 
+import shipmentRoutes from './modules/shipment/route';
 import userRoutes from './modules/User/UserRoutes';
 import authRoutes from "./modules/auth/route";
 import exceptionRoutes from "./modules/Expections/exceptionRoutes";
+import logsRoutes from "./modules/logs/logsRoutes";
 import runExceptionTracker from "./cron/exceptionTracker";
 
 dotenv.config();
@@ -18,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'http://localhost:3001', 
+  origin: 'http://localhost:3001',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -41,12 +42,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/shipments', shipmentRoutes);
 app.use('/api/exceptions', exceptionRoutes);
+app.use('/api/logs', logsRoutes);
 
 // Global Error Handler
 // Look for this at the bottom of src/index.ts
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("DEBUG - Error caught in Global Handler:", err); // ADD THIS LINE
-  res.status(err.status || 400).json({ 
+  res.status(err.status || 400).json({
     message: err.message || "Internal Server Error",
     error: err.error || err // Include the raw error for debugging
   });

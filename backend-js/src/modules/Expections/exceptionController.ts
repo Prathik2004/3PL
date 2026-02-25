@@ -14,21 +14,73 @@ interface ResolveParams {
  */
 export const getAllExceptions = async (req: Request, res: Response) => {
   try {
-    const { resolved } = req.query;
+    const { resolved, client, carrier, exceptions: exceptionType, search } = req.query as Record<string, string>;
 
-    const filter: { resolved?: boolean } = {};
+    // Build the match stage for Exception fields
+    const exceptionMatch: Record<string, any> = {};
     if (resolved !== undefined) {
-      filter.resolved = resolved === "true";
+      exceptionMatch.resolved = resolved === "true";
+    }
+    if (exceptionType && exceptionType !== 'all') {
+      // Map frontend values to DB types
+      const typeMap: Record<string, string> = {
+        'no_update': 'NoUpdate',
+        'missing_pod': 'MissingPOD',
+        'critical_delay': 'Delay',
+        'not_dispatched': 'NotDispatched',
+      };
+      exceptionMatch.exception_type = typeMap[exceptionType] || exceptionType;
     }
 
-    const exceptions = await Exception.find(filter)
-      .populate("shipment_id")
-      .sort({ createdAt: -1 });
+    // If no client/carrier/search filter, use simple populate query
+    if (!client || client === 'all') {
+      if (!carrier || carrier === 'all') {
+        if (!search) {
+          const exceptions = await Exception.find(exceptionMatch)
+            .populate("shipment_id")
+            .sort({ createdAt: -1 });
+          return res.status(200).json({ total: exceptions.length, data: exceptions });
+        }
+      }
+    }
 
-    return res.status(200).json({
-      total: exceptions.length,
-      data: exceptions,
-    });
+    // Use aggregation to filter by shipment fields
+    const pipeline: any[] = [
+      { $match: exceptionMatch },
+      {
+        $lookup: {
+          from: "shipments",
+          localField: "shipment_id",
+          foreignField: "_id",
+          as: "shipment_id",
+        },
+      },
+      { $unwind: { path: "$shipment_id", preserveNullAndEmpty: true } },
+    ];
+
+    const shipmentMatch: Record<string, any> = {};
+    if (client && client !== 'all') {
+      shipmentMatch["shipment_id.client_name"] = { $regex: client, $options: 'i' };
+    }
+    if (carrier && carrier !== 'all') {
+      shipmentMatch["shipment_id.carrier_name"] = { $regex: carrier, $options: 'i' };
+    }
+    if (search) {
+      shipmentMatch.$or = [
+        { "shipment_id.shipment_id": { $regex: search, $options: 'i' } },
+        { "shipment_id.client_name": { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (Object.keys(shipmentMatch).length > 0) {
+      pipeline.push({ $match: shipmentMatch });
+    }
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    const exceptions = await Exception.aggregate(pipeline);
+    return res.status(200).json({ total: exceptions.length, data: exceptions });
   } catch (error: any) {
     console.error("Get All Exceptions Error:", error);
     return res.status(500).json({ error: error.message });
