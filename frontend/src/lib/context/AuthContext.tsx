@@ -7,6 +7,7 @@ import { AppApiError } from "../errors/AppError";
 
 // A basic User interface. You might decode this from the JWT later.
 export interface User {
+  name: string;
   email: string;
   role: string | "Admin" | "Operations" | "Viewer";
 }
@@ -30,13 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem("accessToken");
     if (token) {
       try {
-        // In a real app, you might `jwt-decode` the token to get the user payload.
-        // For now, we assume if there's a token, they are authenticated.
-        setUser({ email: "user@walkwel.com", role: "Unknown" }); 
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          // Fallback if no user is saved
+          setUser({ name: "Alex Thompson", email: "user@walkwel.com", role: "Unknown" });
+        }
       } catch {
         console.error("Invalid token found in storage");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
       }
     }
     setIsLoading(false);
@@ -45,14 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (payload: LoginPayload) => {
     try {
       const tokens = await authService.login(payload);
-      
+
       localStorage.setItem("accessToken", tokens.accessToken);
       if (tokens.refreshToken) {
         localStorage.setItem("refreshToken", tokens.refreshToken);
       }
 
-      // Normally we parse the JWT here
-      setUser({ email: payload.email, role: "Unknown" });
+      if (tokens.user) {
+        const u: User = { name: tokens.user.name, email: tokens.user.email, role: tokens.user.role };
+        localStorage.setItem("user", JSON.stringify(u));
+        setUser(u);
+      } else {
+        setUser({ name: "Alex Thompson", email: payload.email, role: "Unknown" });
+      }
     } catch (error) {
       if (error instanceof AppApiError) {
         // We throw it so the `useAuth` hook caller (e.g. LoginCard) can show a Toast.
@@ -71,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Always clear local state even if backend fails
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
       setUser(null);
     }
   };
