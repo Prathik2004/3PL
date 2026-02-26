@@ -5,6 +5,7 @@ import {
   resolveException,
   createException,
   getExceptionsSummary,
+  getExceptionFilterOptions,
 } from "./exceptionController";
 
 import { authorizeRoles } from "../../middleware/rbac";
@@ -19,6 +20,14 @@ router.get(
   authenticate,
   authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
   getExceptionsSummary
+);
+
+// Distinct clients, carriers, and exception types present in exceptions (for filter dropdowns)
+router.get(
+  "/filter-options",
+  authenticate,
+  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+  getExceptionFilterOptions
 );
 
 // Get all exceptions, optional filter by resolved

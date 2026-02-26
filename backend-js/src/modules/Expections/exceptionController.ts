@@ -55,7 +55,7 @@ export const getAllExceptions = async (req: Request, res: Response) => {
           as: "shipment_id",
         },
       },
-      { $unwind: { path: "$shipment_id", preserveNullAndEmpty: true } },
+      { $unwind: { path: "$shipment_id", preserveNullAndEmptyArrays: true } },
     ];
 
     const shipmentMatch: Record<string, any> = {};
@@ -185,6 +185,54 @@ export const createException = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Create Exception Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * GET /api/exceptions/filter-options
+ * Returns distinct clients, carriers, and exception types that exist in the
+ * exceptions collection (joined with their shipments). Used to power the
+ * dynamic filter dropdowns on the Exceptions page.
+ */
+export const getExceptionFilterOptions = async (req: Request, res: Response) => {
+  try {
+    const pipeline = [
+      // Only include exceptions whose shipment still exists
+      {
+        $lookup: {
+          from: "shipments",
+          localField: "shipment_id",
+          foreignField: "_id",
+          as: "shipment",
+        },
+      },
+      { $unwind: { path: "$shipment", preserveNullAndEmptyArrays: false } },
+      {
+        $group: {
+          _id: null,
+          clients: { $addToSet: "$shipment.client_name" },
+          carriers: { $addToSet: "$shipment.carrier_name" },
+          exceptionTypes: { $addToSet: "$exception_type" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          clients: { $sortArray: { input: "$clients", sortBy: 1 } },
+          carriers: { $sortArray: { input: "$carriers", sortBy: 1 } },
+          exceptionTypes: { $sortArray: { input: "$exceptionTypes", sortBy: 1 } },
+        },
+      },
+    ];
+
+    const [result] = await Exception.aggregate(pipeline);
+
+    return res.status(200).json(
+      result ?? { clients: [], carriers: [], exceptionTypes: [] }
+    );
+  } catch (error: any) {
+    console.error("Get Exception Filter Options Error:", error);
     return res.status(500).json({ error: error.message });
   }
 };

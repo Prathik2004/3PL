@@ -1,22 +1,67 @@
 "use client";
 
-import { Suspense, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState, useCallback, useRef } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import ExceptionCard from "@/src/components/ui/Dashboard/ExceptionCard";
-import { FilterBar } from "@/src/components/common/FilterBar";
-import { RefreshCwOff, FileText, CalendarX, ClipboardList } from "lucide-react";
+import { RefreshCwOff, FileText, CalendarX, ClipboardList, ListFilter, ChevronDown, X } from "lucide-react";
 import { apiClient } from "@/src/lib/api/client";
 import Pagination from "@/src/components/ui/Pagination";
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 interface ExceptionSummary {
-  NoUpdate: number; MissingPOD: number; Delay: number; NotDispatched: number; total: number;
+  NoUpdate: number;
+  MissingPOD: number;
+  Delay: number;
+  NotDispatched: number;
+  total: number;
 }
+
 interface ExceptionLog {
   _id: string;
   shipment_id: { shipment_id: string; client_name: string; carrier_name: string; status: string } | null;
-  exception_type: string; description: string; resolved: boolean; createdAt: string;
+  exception_type: string;
+  description: string;
+  resolved: boolean;
+  createdAt: string;
 }
-interface ExceptionsApiResponse { total: number; data: ExceptionLog[]; }
+
+interface ExceptionsApiResponse {
+  total: number;
+  data: ExceptionLog[];
+}
+
+interface FilterOptions {
+  clients: string[];
+  carriers: string[];
+  exceptionTypes: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Exception display helpers
+// ---------------------------------------------------------------------------
+const EXCEPTION_TYPE_LABELS: Record<string, string> = {
+  NoUpdate: "No Update",
+  MissingPOD: "Missing POD",
+  Delay: "Critical Delay",
+  NotDispatched: "Not Dispatched",
+};
+
+const EXCEPTION_TYPE_VALUES: Record<string, string> = {
+  no_update: "NoUpdate",
+  missing_pod: "MissingPOD",
+  critical_delay: "Delay",
+  not_dispatched: "NotDispatched",
+};
+
+// Convert DB exception_type to the query-param key the backend expects
+const EXCEPTION_DB_TO_PARAM: Record<string, string> = {
+  NoUpdate: "no_update",
+  MissingPOD: "missing_pod",
+  Delay: "critical_delay",
+  NotDispatched: "not_dispatched",
+};
 
 function ExceptionBadge({ type }: { type: string }) {
   const styles: Record<string, string> = {
@@ -24,19 +69,220 @@ function ExceptionBadge({ type }: { type: string }) {
     MissingPOD: "bg-orange-50 text-orange-700 border-orange-200",
     Delay: "bg-red-50 text-red-700 border-red-200",
     NotDispatched: "bg-slate-100 text-slate-600 border-slate-200",
-  }
-  const label: Record<string, string> = {
-    NoUpdate: "No Update", MissingPOD: "Missing POD", Delay: "Delay", NotDispatched: "Not Dispatched",
-  }
+  };
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold border ${styles[type] || "bg-slate-100 text-slate-600 border-slate-200"}`}>
-      {label[type] || type}
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold border ${styles[type] || "bg-slate-100 text-slate-600 border-slate-200"
+        }`}
+    >
+      {EXCEPTION_TYPE_LABELS[type] || type}
     </span>
-  )
+  );
 }
 
+// ---------------------------------------------------------------------------
+// Generic inline dropdown (no external dependency)
+// ---------------------------------------------------------------------------
+interface InlineDropdownProps {
+  label: string;
+  value: string;
+  options: { label: string; value: string }[];
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  searchable?: boolean;
+}
+
+function InlineDropdown({ label, value, options, onChange, disabled, searchable }: InlineDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const displayLabel = value === "all" ? "All" : options.find((o) => o.value === value)?.label ?? value;
+  const filtered = searchable
+    ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="relative inline-flex items-center gap-1.5" ref={ref}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => {
+          if (!disabled) {
+            setOpen((o) => !o);
+            setQuery("");
+          }
+        }}
+        className={`flex items-center gap-1.5 outline-none ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        <span className="text-[15px] font-medium text-slate-500">{label}:</span>
+        <span className="text-[15px] font-bold text-slate-900">{displayLabel}</span>
+        <ChevronDown size={14} className="text-slate-500 mt-0.5" />
+      </button>
+
+      {open && (
+        <div className="absolute top-[calc(100%+8px)] left-0 w-[240px] rounded-[18px] border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden z-50">
+          {searchable && (
+            <div className="px-3 pt-3 pb-2">
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-[10px] bg-[#f4f7f9] px-3 py-2 text-[14px] text-slate-900 outline-none placeholder:text-slate-400"
+              />
+            </div>
+          )}
+          <div className="flex flex-col gap-0.5 p-2 max-h-[280px] overflow-y-auto">
+            {/* "All" is always the first option */}
+            <div
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors"
+              onClick={() => { onChange("all"); setOpen(false); }}
+            >
+              <div className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border-[1.5px] ${value === "all" ? "border-slate-800 bg-slate-800" : "border-slate-300"}`}>
+                {value === "all" && <div className="h-2 w-2 rounded-full bg-white" />}
+              </div>
+              <span className={`text-[15px] ${value === "all" ? "font-medium text-slate-900" : "text-slate-600"}`}>All</span>
+            </div>
+            {filtered.length === 0 && (
+              <div className="px-3 py-4 text-[14px] text-slate-400 text-center">No results</div>
+            )}
+            {filtered.map((opt) => (
+              <div
+                key={opt.value}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+              >
+                <div className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border-[1.5px] ${value === opt.value ? "border-slate-800 bg-slate-800" : "border-slate-300"}`}>
+                  {value === opt.value && <div className="h-2 w-2 rounded-full bg-white" />}
+                </div>
+                <span className={`text-[15px] ${value === opt.value ? "font-medium text-slate-900" : "text-slate-600"}`}>
+                  {opt.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Exceptions-specific filter bar
+// Fetches its own options from /api/exceptions/filter-options so the dropdowns
+// only show clients, carriers, and exception types that are actually present in
+// the exceptions collection — they are never polluted by shipments that have no
+// exceptions at all.
+// ---------------------------------------------------------------------------
+interface ExceptionsFilterBarProps {
+  currentClient: string;
+  currentCarrier: string;
+  currentException: string;
+  onUpdate: (key: string, value: string) => void;
+  onClear: () => void;
+}
+
+function ExceptionsFilterBar({
+  currentClient,
+  currentCarrier,
+  currentException,
+  onUpdate,
+  onClear,
+}: ExceptionsFilterBarProps) {
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    clients: [],
+    carriers: [],
+    exceptionTypes: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient<FilterOptions>("/exceptions/filter-options")
+      .then(setFilterOptions)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const clientOptions = filterOptions.clients.map((c) => ({ label: c, value: c }));
+  const carrierOptions = filterOptions.carriers.map((c) => ({ label: c, value: c }));
+
+  // Map DB exception types (e.g. "NoUpdate") to user-friendly option objects
+  const exceptionOptions = filterOptions.exceptionTypes.map((t) => ({
+    label: EXCEPTION_TYPE_LABELS[t] ?? t,
+    // The backend expects the underscore_case query param key
+    value: EXCEPTION_DB_TO_PARAM[t] ?? t.toLowerCase(),
+  }));
+
+  const hasActiveFilters =
+    currentClient !== "all" || currentCarrier !== "all" || currentException !== "all";
+
+  return (
+    <div className="flex w-max items-center gap-4 rounded-xl bg-slate-50/80 px-4 py-2.5 shadow-sm border border-transparent">
+      {/* Filter icon + label */}
+      <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
+        <ListFilter size={16} className="text-slate-700" />
+        <span className="text-[15px] font-bold text-slate-900 tracking-wide">Filter</span>
+      </div>
+
+      {/* Dropdowns */}
+      <div className="flex items-center gap-5">
+        <InlineDropdown
+          label="Client"
+          value={currentClient}
+          options={clientOptions}
+          onChange={(v) => onUpdate("client", v)}
+          disabled={loading}
+          searchable
+        />
+        <InlineDropdown
+          label="Carrier"
+          value={currentCarrier}
+          options={carrierOptions}
+          onChange={(v) => onUpdate("carrier", v)}
+          disabled={loading}
+          searchable
+        />
+        <InlineDropdown
+          label="Exceptions"
+          value={currentException}
+          options={exceptionOptions}
+          onChange={(v) => onUpdate("exceptions", v)}
+          disabled={loading}
+        />
+      </div>
+
+      {/* Clear button — only shown when at least one filter is active */}
+      {hasActiveFilters && (
+        <button
+          onClick={onClear}
+          className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600 transition-colors ml-2 font-medium"
+        >
+          <X size={13} />
+          Clear
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main page content
+// ---------------------------------------------------------------------------
 function ExceptionsContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const [summary, setSummary] = useState<ExceptionSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [logs, setLogs] = useState<ExceptionLog[]>([]);
@@ -47,12 +293,30 @@ function ExceptionsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const LIMIT = 15;
 
-  // Read FilterBar URL params
-  const currentClient = searchParams.get('client') || 'all';
-  const currentCarrier = searchParams.get('carrier') || 'all';
-  const currentException = searchParams.get('exceptions') || 'all';
+  // Read filter values from URL params
+  const currentClient = searchParams.get("client") || "all";
+  const currentCarrier = searchParams.get("carrier") || "all";
+  const currentException = searchParams.get("exceptions") || "all";
 
-  // Fetch summary
+  // Helpers to update URL params (same strategy as useFilters hook)
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === "all" || !value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
+  const clearFilters = useCallback(() => {
+    router.push(pathname);
+  }, [pathname, router]);
+
+  // Fetch summary KPIs
   useEffect(() => {
     apiClient<ExceptionSummary>("/exceptions/summary")
       .then(setSummary)
@@ -60,15 +324,15 @@ function ExceptionsContent() {
       .finally(() => setSummaryLoading(false));
   }, []);
 
-  // Fetch exception logs — re-runs when any filter or resolved toggle changes
+  // Fetch exception logs — re-runs whenever any filter or resolved toggle changes
   const fetchLogs = useCallback(async () => {
     setLogsLoading(true);
     setLogsError(null);
     try {
       const params = new URLSearchParams({ resolved: showResolved ? "true" : "false" });
-      if (currentClient !== 'all') params.set("client", currentClient);
-      if (currentCarrier !== 'all') params.set("carrier", currentCarrier);
-      if (currentException !== 'all') params.set("exceptions", currentException);
+      if (currentClient !== "all") params.set("client", currentClient);
+      if (currentCarrier !== "all") params.set("carrier", currentCarrier);
+      if (currentException !== "all") params.set("exceptions", currentException);
       const res = await apiClient<ExceptionsApiResponse>(`/exceptions?${params.toString()}`);
       setLogs(res.data);
       setTotal(res.total);
@@ -82,7 +346,7 @@ function ExceptionsContent() {
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
   useEffect(() => { setCurrentPage(1); }, [currentClient, currentCarrier, currentException, showResolved]);
 
-  const count = (v?: number) => summaryLoading ? 0 : (v ?? 0);
+  const count = (v?: number) => (summaryLoading ? 0 : (v ?? 0));
   const totalPages = Math.ceil(total / LIMIT) || 1;
   const startIdx = total === 0 ? 0 : (currentPage - 1) * LIMIT + 1;
   const endIdx = Math.min(currentPage * LIMIT, total);
@@ -107,12 +371,20 @@ function ExceptionsContent() {
         <ExceptionCard title="Not Dispatched" count={count(summary?.NotDispatched)} severity="neutral" icon={ClipboardList} />
       </div>
 
-      {/* Filter Bar + Resolved Toggle */}
+      {/* Dynamic Filter Bar + Resolved Toggle */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <FilterBar />
+        <ExceptionsFilterBar
+          currentClient={currentClient}
+          currentCarrier={currentCarrier}
+          currentException={currentException}
+          onUpdate={updateFilter}
+          onClear={clearFilters}
+        />
         <button
-          onClick={() => setShowResolved(v => !v)}
-          className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors cursor-pointer ${showResolved ? "bg-green-50 text-green-700 border-green-200" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+          onClick={() => setShowResolved((v) => !v)}
+          className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors cursor-pointer ${showResolved
+              ? "bg-green-50 text-green-700 border-green-200"
+              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
             }`}
         >
           {showResolved ? "Showing Resolved" : "Show Resolved"}
@@ -125,35 +397,69 @@ function ExceptionsContent() {
           <table className="w-full text-left border-collapse min-w-[860px]">
             <thead>
               <tr className="bg-[#F8FAFC]/50 border-b border-[#E2E8F0]">
-                {["Shipment", "Client", "Carrier", "Exception Type", "Description", "Status", "Raised At"].map(h => (
-                  <th key={h} className="px-6 py-5 text-[11px] font-bold text-[#64748B] uppercase tracking-widest whitespace-nowrap">{h}</th>
+                {["Shipment", "Client", "Carrier", "Exception Type", "Description", "Status", "Raised At"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-6 py-5 text-[11px] font-bold text-[#64748B] uppercase tracking-widest whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
               {logsLoading ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-[14px]">Loading exceptions…</td></tr>
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-[14px]">
+                    Loading exceptions…
+                  </td>
+                </tr>
               ) : logsError ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-red-400 text-[14px]">{logsError}</td></tr>
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center text-red-400 text-[14px]">
+                    {logsError}
+                  </td>
+                </tr>
               ) : logs.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-[14px]">
-                  {showResolved ? "No resolved exceptions." : "🎉 No active exceptions right now."}
-                </td></tr>
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-[14px]">
+                    {showResolved ? "No resolved exceptions." : "No active exceptions right now."}
+                  </td>
+                </tr>
               ) : (
-                logs.slice((currentPage - 1) * LIMIT, currentPage * LIMIT).map(ex => (
+                logs.slice((currentPage - 1) * LIMIT, currentPage * LIMIT).map((ex) => (
                   <tr key={ex._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-5 font-bold text-[14px] text-[#0F172A] whitespace-nowrap">{ex.shipment_id?.shipment_id ?? "—"}</td>
-                    <td className="px-6 py-5 text-[13.5px] text-slate-600">{ex.shipment_id?.client_name ?? "—"}</td>
-                    <td className="px-6 py-5 text-[13.5px] text-slate-600">{ex.shipment_id?.carrier_name ?? "—"}</td>
-                    <td className="px-6 py-5"><ExceptionBadge type={ex.exception_type} /></td>
-                    <td className="px-6 py-5 text-[13px] text-slate-500 max-w-[260px]">{ex.description || "—"}</td>
+                    <td className="px-6 py-5 font-bold text-[14px] text-[#0F172A] whitespace-nowrap">
+                      {ex.shipment_id?.shipment_id ?? "—"}
+                    </td>
+                    <td className="px-6 py-5 text-[13.5px] text-slate-600">
+                      {ex.shipment_id?.client_name ?? "—"}
+                    </td>
+                    <td className="px-6 py-5 text-[13.5px] text-slate-600">
+                      {ex.shipment_id?.carrier_name ?? "—"}
+                    </td>
                     <td className="px-6 py-5">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold border ${ex.resolved ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"}`}>
+                      <ExceptionBadge type={ex.exception_type} />
+                    </td>
+                    <td className="px-6 py-5 text-[13px] text-slate-500 max-w-[260px]">
+                      {ex.description || "—"}
+                    </td>
+                    <td className="px-6 py-5">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold border ${ex.resolved
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : "bg-red-50 text-red-700 border-red-200"
+                          }`}
+                      >
                         {ex.resolved ? "Resolved" : "Active"}
                       </span>
                     </td>
                     <td className="px-6 py-5 text-[13px] text-slate-400 whitespace-nowrap">
-                      {new Date(ex.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(ex.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </td>
                   </tr>
                 ))
@@ -163,7 +469,11 @@ function ExceptionsContent() {
         </div>
         <div className="flex items-center justify-between px-8 py-5 border-t border-[#E2E8F0]">
           <span className="text-[13px] text-[#64748B]">
-            Showing <span className="font-bold text-[#0F172A]">{startIdx}–{endIdx}</span> of <span className="font-bold text-[#0F172A]">{total}</span> exceptions
+            Showing{" "}
+            <span className="font-bold text-[#0F172A]">
+              {startIdx}–{endIdx}
+            </span>{" "}
+            of <span className="font-bold text-[#0F172A]">{total}</span> exceptions
           </span>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
