@@ -4,6 +4,48 @@
 !README.md
 
 !/backend-js/
+
+/backend-js/node_modules/
+/backend-js/dist/
+/backend-js/.package-lock.json
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Next.js build output
+.next/
+out/
+build/
+
+# Backend folders (Specific to your 4-team collaboration)
+
+
+# Environment variables (Crucial for security)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+
+.env
+!.gitignore
+!README.md
+
+!/backend-js/
 !/backend-php/
 
 /backend-js/node_modules/

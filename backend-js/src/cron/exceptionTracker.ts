@@ -1,56 +1,53 @@
 import cron from "node-cron";
 import { Shipment, IShipment } from "../models/shipment";
 import Exception from "../models/Exception.model";
-import { sendEmail } from "../utils/email";
+import { transporter } from "../config/mailer";
+import { IUser } from "../models/user";
+
+// 🔹 Define a type for populated shipments
+type ShipmentPopulated = Omit<IShipment, "created_by"> & { created_by?: IUser };
 
 const runExceptionTracker = (): void => {
-  cron.schedule("*/10 * * * * *", async () => {
+  cron.schedule("0 */1 * * * *", async () => {
     try {
       console.log("Running Exception Tracker...");
 
-      const shipments: IShipment[] = await Shipment.find({
-        status: { $ne: "Cancelled" },
-      });
+      // Populate 'created_by' so we can access email
+      const shipments = await Shipment.find({
+        status: { $nin: ["Delivered", "Cancelled"] },
+      }).populate<{ created_by: IUser }>("created_by");
 
       const now = new Date();
 
       for (const shipment of shipments) {
-        // 🔴 Delay
-        if (
-          shipment.status !== "Delivered" &&
-          now > shipment.expected_delivery_date
-        ) {
-          await createException(shipment._id, "Delay", "Shipment delayed");
+        // Convert Mongoose doc to plain object with correct type
+        const s: ShipmentPopulated = shipment.toObject();
+
+        //  Delay
+        if (s.status !== "Delivered" && now > s.expected_delivery_date) {
+          await createException(s, "Delay", "Shipment delayed");
         }
 
-        // 🟠 No Update (24 hrs)
+        // No Update (24 hrs)
         const hoursSinceUpdate =
-          (now.getTime() - shipment.last_status_update.getTime()) /
-          (1000 * 60 * 60);
+          (now.getTime() - s.last_status_update.getTime()) / (1000 * 60 * 60);
 
-        if (shipment.status !== "Delivered" && hoursSinceUpdate > 24) {
-          await createException(
-            shipment._id,
-            "NoUpdate",
-            "No status update in 24 hours",
-          );
+        if (s.status !== "Delivered" && hoursSinceUpdate > 24) {
+          await createException(s, "NoUpdate", "No status update in 24 hours");
         }
 
-        // 🟡 Missing POD
-        if (
-          shipment.status === "Delivered" &&
-          shipment.pod_received === false
-        ) {
-          await createException(shipment._id, "MissingPOD", "POD not received");
+        //  Missing POD
+        if (s.status === "Delivered" && s.pod_received === false) {
+          await createException(s, "MissingPOD", "POD not received");
         }
 
-        // 🔵 Not Dispatched (48 hrs)
+        //  Not Dispatched (48 hrs)
         const hoursSinceCreated =
-          (now.getTime() - shipment.created_at.getTime()) / (1000 * 60 * 60);
+          (now.getTime() - s.created_at.getTime()) / (1000 * 60 * 60);
 
-        if (shipment.status === "Created" && hoursSinceCreated > 48) {
+        if (s.status === "Created" && hoursSinceCreated > 48) {
           await createException(
-            shipment._id,
+            s,
             "NotDispatched",
             "Shipment not dispatched in 48 hours",
           );
@@ -62,39 +59,45 @@ const runExceptionTracker = (): void => {
   });
 };
 
+//  Use ShipmentPopulated here as well
 const createException = async (
-  shipmentId: any,
+  shipment: ShipmentPopulated,
   type: "Delay" | "NoUpdate" | "MissingPOD" | "NotDispatched",
   message: string,
 ) => {
   const existing = await Exception.findOne({
-    shipment_id: shipmentId,
+    shipment_id: shipment._id,
     exception_type: type,
     resolved: false,
   });
 
   if (!existing) {
     await Exception.create({
-      shipment_id: shipmentId,
+      shipment_id: shipment._id,
       exception_type: type,
       description: message,
     });
 
-    console.log("✅ Exception Created:", type);
+    console.log("Exception Created:", type);
 
-    // Send test email
-    await sendEmail({
-      to: "recipient@example.com", // Just any dummy email
-      subject: `🚨 Exception Created: ${type}`,
-      text: `Shipment ID: ${shipmentId}\nType: ${type}\nMessage: ${message}`,
-      html: `<h2>🚨 Exception Created: ${type}</h2>
-             <p><b>Shipment ID:</b> ${shipmentId}</p>
-             <p><b>Description:</b> ${message}</p>`,
-    });
-
-    console.log(`🔥 NEW Exception Created → ${type} | Shipment: ${shipmentId}`);
+    if (shipment.created_by?.email) {
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: shipment.created_by.email,
+        subject: `Walkwel 3PL - Exception Created: ${type}`,
+        html: `
+          <h3>An exception has been created</h3>
+          <p><b>Shipment ID:</b> ${shipment.shipment_id}</p>
+          <p><b>Type:</b> ${type}</p>
+          <p><b>Description:</b> ${message}</p>
+        `,
+      });
+      console.log(`Email sent to ${shipment.created_by.email}`);
+    } else {
+      console.warn("Shipment1 has no user email. Cannot send notification.");
+    }
   } else {
-    console.log(`⚠️ Already Exists → ${type} | Shipment: ${shipmentId}`);
+    console.log(`Already Exists → ${type} | Shipment: ${shipment.shipment_id}`);
   }
 };
 

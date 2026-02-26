@@ -8,7 +8,6 @@ out/
 build/
 
 # Backend folders (Specific to your 4-team collaboration)
-/backend-js
 /backend-php
 /backend-python
 
@@ -43,4 +42,3 @@ src/app/test-lab/
 <<<<<<< HEAD
 =======
 /package-lock.*
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4

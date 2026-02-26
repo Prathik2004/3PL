@@ -1,37 +1,90 @@
 import { Router } from 'express';
 import { ShipmentController } from './controller';
 import { authorizeRoles } from '../../middleware/rbac';
+import { authenticate } from '../../middleware/authenticate';
 import { UserRole } from '../../types';
 import multer from 'multer';
 
 const upload = multer({ dest: 'uploads/' });
 const router = Router();
 
-// Assuming anyone logged in can upload CSV (or add authorizeRoles if needed)
-router.post('/upload', upload.single('file'), ShipmentController.uploadCSV);
+// ── Static routes MUST come before /:id wildcard ──────────────────────────────
 
-// Viewer, Operations, and Admin can read shipments 
-router.get('/', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER), 
-  ShipmentController.getAll
+// Dashboard stats
+router.get(
+    '/stats',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getStats
 );
 
-// Only Operations and Admin can create shipments 
-router.post('/', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.create
+// Filter-bar data helpers
+router.get(
+    '/clients',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getClients
 );
 
-// Only Operations and Admin can update shipments
-router.put('/:id/status', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.updateStatus
+router.get(
+    '/carriers',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getCarriers
 );
 
-// Soft delete (Cancel) - Only Operations and Admin
-router.delete('/:id', 
-  authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS), 
-  ShipmentController.delete
+router.get(
+    '/trends',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getTrends
+);
+
+// Export shipments (CSV/XLSX)
+router.get(
+    '/export',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.export
+);
+
+// Bulk upload via CSV
+router.post('/upload', authenticate, upload.single('file'), ShipmentController.uploadCSV);
+
+// ── Collection routes ──────────────────────────────────────────────────────────
+
+// Viewer, Operations, and Admin can list shipments
+router.get(
+    '/',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS, UserRole.VIEWER),
+    ShipmentController.getAll
+);
+
+// Only Admin can create shipments manually
+router.post(
+    '/',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN),
+    ShipmentController.create
+);
+
+// ── Parameterised routes (:id) — keep LAST ────────────────────────────────────
+
+// Only Operations and Admin can update shipment status
+router.put(
+    '/:id/status',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    ShipmentController.updateStatus
+);
+
+// Soft delete (Cancel) — Admin and Operations
+router.delete(
+    '/:id',
+    authenticate,
+    authorizeRoles(UserRole.ADMIN, UserRole.OPERATIONS),
+    ShipmentController.delete
 );
 
 export default router;

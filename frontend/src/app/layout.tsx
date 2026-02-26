@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/src/lib/context/AuthContext";
 
 export const metadata = {
   title: "Walkwel 3PL Control Lite",
@@ -19,14 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-white antialiased`}>
-<<<<<<< HEAD
-        {/* This is now a clean entry point. 
-          The flex-layout logic can be handled inside specific (page).tsx 
-          or a group layout to keep this file lean.
-        */}
-=======
->>>>>>> 189f030a88f25e69b0488e69f314441e67b861e4
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

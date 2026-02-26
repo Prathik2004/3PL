@@ -1,0 +1,2 @@
+shipment_id,client_name,origin,destination,dispatch_date,expected_delivery_date,carrier_name
+CSV-SHP-1771997315704,CSV Client,London,Paris,2026-06-01,2026-06-05,DHL

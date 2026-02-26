@@ -1,0 +1,42 @@
+export const ANALYTICS_METRICS = [
+  {
+    title: "Avg. Transit Time",
+    value: "3.2 Days",
+    change: "0.2%",
+    trend: "down",
+    status: "success",
+    iconSrc: "/icons/timeline.svg",
+  },
+  {
+    title: "Carrier Performance",
+    value: "94%",
+    change: "0.2%",
+    trend: "up",
+    status: "success",
+    iconSrc: "/icons/shipment.svg",
+  },
+  {
+    title: "POD Compliance",
+    value: "99.1%",
+    change: "Stable",
+    trend: "stable",
+    status: "neutral",
+    iconSrc: "/icons/tick.svg",
+  },
+  {
+    title: "Order Accuracy",
+    value: "96.4%",
+    change: "0.5%",
+    trend: "up",
+    status: "success",
+    iconSrc: "/icons/ontime.svg",
+  },
+  {
+    title: "Exception Resolution",
+    value: "88%",
+    change: "3.0%",
+    trend: "down",
+    status: "critical",
+    iconSrc: "/icons/exceptions.svg",
+  },
+] as const;

@@ -1,28 +1,86 @@
 import { Request, Response } from "express";
+import { RequestHandler } from "express";
 import mongoose from "mongoose";
 import Exception from "../../models/Exception.model";
+import { resolveExceptionService } from "../../cron/resolveException";
 
+
+interface ResolveParams {
+  id: string;
+}
 /**
  * GET All Exceptions
  * Query: ?resolved=true/false
  */
 export const getAllExceptions = async (req: Request, res: Response) => {
   try {
-    const { resolved } = req.query;
+    const { resolved, client, carrier, exceptions: exceptionType, search } = req.query as Record<string, string>;
 
-    const filter: { resolved?: boolean } = {};
+    // Build the match stage for Exception fields
+    const exceptionMatch: Record<string, any> = {};
     if (resolved !== undefined) {
-      filter.resolved = resolved === "true";
+      exceptionMatch.resolved = resolved === "true";
+    }
+    if (exceptionType && exceptionType !== 'all') {
+      // Map frontend values to DB types
+      const typeMap: Record<string, string> = {
+        'no_update': 'NoUpdate',
+        'missing_pod': 'MissingPOD',
+        'critical_delay': 'Delay',
+        'not_dispatched': 'NotDispatched',
+      };
+      exceptionMatch.exception_type = typeMap[exceptionType] || exceptionType;
     }
 
-    const exceptions = await Exception.find(filter)
-      .populate("shipment_id")
-      .sort({ createdAt: -1 });
+    // If no client/carrier/search filter, use simple populate query
+    if (!client || client === 'all') {
+      if (!carrier || carrier === 'all') {
+        if (!search) {
+          const exceptions = await Exception.find(exceptionMatch)
+            .populate("shipment_id")
+            .sort({ createdAt: -1 });
+          return res.status(200).json({ total: exceptions.length, data: exceptions });
+        }
+      }
+    }
 
-    return res.status(200).json({
-      total: exceptions.length,
-      data: exceptions,
-    });
+    // Use aggregation to filter by shipment fields
+    const pipeline: any[] = [
+      { $match: exceptionMatch },
+      {
+        $lookup: {
+          from: "shipments",
+          localField: "shipment_id",
+          foreignField: "_id",
+          as: "shipment_id",
+        },
+      },
+      { $unwind: { path: "$shipment_id", preserveNullAndEmpty: true } },
+    ];
+
+    const shipmentMatch: Record<string, any> = {};
+    if (client && client !== 'all') {
+      shipmentMatch["shipment_id.client_name"] = { $regex: client, $options: 'i' };
+    }
+    if (carrier && carrier !== 'all') {
+      shipmentMatch["shipment_id.carrier_name"] = { $regex: carrier, $options: 'i' };
+    }
+    if (search) {
+      shipmentMatch.$or = [
+        { "shipment_id.shipment_id": { $regex: search, $options: 'i' } },
+        { "shipment_id.client_name": { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (Object.keys(shipmentMatch).length > 0) {
+      pipeline.push({ $match: shipmentMatch });
+    }
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    const exceptions = await Exception.aggregate(pipeline);
+    return res.status(200).json({ total: exceptions.length, data: exceptions });
   } catch (error: any) {
     console.error("Get All Exceptions Error:", error);
     return res.status(500).json({ error: error.message });
@@ -68,27 +126,15 @@ export const getExceptionsByShipment = async (req: Request, res: Response) => {
 /**
  * PUT Resolve Exception
  */
-export const resolveException = async (req: Request, res: Response) => {
+export const resolveException: RequestHandler = async (req, res) => {
   try {
-    let { id } = req.params;
+    const { id } = req.params as { id: string };
+    const { resolution_note } = req.body as { resolution_note?: string };
 
-    if (Array.isArray(id)) id = id[0];
-
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid exception ID" });
-    }
-
-    const exception = await Exception.findByIdAndUpdate(
-      id,
-      { resolved: true },
-      { new: true },
-    );
-
-    if (!exception) {
-      return res.status(404).json({ error: "Exception not found" });
-    }
+    const exception = await resolveExceptionService(id, resolution_note);
 
     return res.status(200).json({
+      success: true,
       message: "Exception resolved successfully",
       data: exception,
     });
@@ -139,6 +185,39 @@ export const createException = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Create Exception Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * GET /api/exceptions/summary
+ * Returns count of unresolved exceptions grouped by exception_type.
+ */
+export const getExceptionsSummary = async (req: Request, res: Response) => {
+  try {
+    const groups = await Exception.aggregate([
+      { $match: { resolved: false } },
+      { $group: { _id: "$exception_type", count: { $sum: 1 } } },
+    ]);
+
+    const summary: Record<string, number> = {
+      NoUpdate: 0,
+      MissingPOD: 0,
+      Delay: 0,
+      NotDispatched: 0,
+    };
+
+    let total = 0;
+    for (const g of groups) {
+      if (g._id in summary) {
+        summary[g._id] = g.count;
+      }
+      total += g.count;
+    }
+
+    return res.status(200).json({ ...summary, total });
+  } catch (error: any) {
+    console.error("Get Exceptions Summary Error:", error);
     return res.status(500).json({ error: error.message });
   }
 };

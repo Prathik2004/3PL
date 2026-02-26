@@ -1,17 +1,41 @@
+"use client"
 import Image from "next/image";
 import StatusIcon from "./StatusIcon";
 import { ShipmentRowProps } from "@/src/types/types";
+import { useState } from "react";
+import DeleteModal from "../DeleteModal";
+import EditShipmentModal from "../EditShipmentModal";
+import { AnimatePresence } from "motion/react";
 
 
-const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, alert, status, alertColor = "None" }: ShipmentRowProps) => {
+const ShipmentRow = ({ shipmentId, internalId, client, lastUpdated, carrier, dest, expDel, alert, status, origin, alertColor = "None" }: ShipmentRowProps) => {
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
   return (
     <div
-      className={`w-full min-h-[80px] ${alertColor === "Yellow"
+      className={`w-full min-h-20 ${alertColor === "Yellow"
         ? "bg-[#FFF7ED] hover:bg-[#FFEDD5]"
         : alertColor === "None"
           ? "bg-white hover:bg-slate-50"
           : "bg-[#FFE8E8] hover:bg-[#FEE2E2]"
         } grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_1fr_1fr] items-center px-6 border-b border-[#E2E8F0] cursor-pointer transition-colors duration-150`}>
+      <AnimatePresence>
+
+        {editModalOpen && <EditShipmentModal
+          shipmentId={shipmentId}
+          internalId={internalId}
+          client={client}
+          carrier={carrier}
+          dest={dest}
+          status={status}
+          origin={origin}
+          onClose={() => setEditModalOpen(false)} />}
+
+        {deleteModalOpen && <DeleteModal shipmentId={internalId} onClose={() => setDeleteModalOpen(false)} />}
+      </AnimatePresence>
+
 
       {/* SHIPMENTID & CLIENT */}
       <div className="flex flex-col py-3">
@@ -60,18 +84,21 @@ const ShipmentRow = ({ shipmentId, client, lastUpdated, carrier, dest, expDel, a
             ? "text-red-600 bg-red-50"
             : "text-slate-400"
           } text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider`}>
-          {alert && alert !== "-" ? alert : "-"}
+          {alert ?? "-"}
         </span>
       </div>
 
       {/* ACTIONS */}
-      <div className="flex items-center justify-center gap-1">
-        <button className="p-2 hover:bg-red-50 rounded-full transition-colors group">
-          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18}/>
+      <div className="flex items-center justify-center gap-1 group">
+        <button onClick={() => setEditModalOpen(true)}
+          className="hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40} />
         </button>
-        <button className="p-2 hover:bg-blue-50 rounded-full transition-colors group">
-          <Image alt="edit" src={'/icons/Edit.svg'} width={40} height={40}/>
+        <button onClick={() => setDeleteModalOpen(true)}
+          className="p-3 hover:bg-blue-100 rounded-full transistion-colors duration-500 outline-none active:ring-0">
+          <Image alt="delete" src={'/icons/delete.svg'} width={18} height={18} />
         </button>
+
       </div>
     </div>
   )
