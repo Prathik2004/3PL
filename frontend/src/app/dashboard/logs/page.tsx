@@ -174,7 +174,7 @@ export default function LogsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="w-full bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col md:flex-row items-center gap-4">
+      <div className="relative z-10 w-full bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col md:flex-row items-center gap-4">
         <div className="relative flex-1 w-full group">
           <img src="/icons/search.svg" alt="Search" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
           <input

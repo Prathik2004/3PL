@@ -49,7 +49,7 @@ function DashboardContent() {
 
       <div className="space-y-6">
         {/* Filter and Action Buttons Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <ResponsiveFilterBar />
           <div className="flex items-center gap-3">
             <ExportButton />

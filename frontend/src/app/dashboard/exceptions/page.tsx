@@ -265,7 +265,7 @@ function ExceptionsFilterBar({
   );
 
   return (
-    <div className="w-full">
+    <div className="relative z-10 w-full">
       {/* Desktop Filter Row (Hidden on mobile) */}
       <div className="hidden sm:flex w-max items-center gap-4 rounded-[14px] bg-slate-50/80 border border-slate-200 px-4 py-2.5 shadow-sm backdrop-blur-sm">
         {/* Fixed "Filter" prefix icon */}

@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex items-center">
+      <div className="relative z-10 flex items-center">
         <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded bg-slate-100" />}>
           <ResponsiveFilterBar />
         </Suspense>
