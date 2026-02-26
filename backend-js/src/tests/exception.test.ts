@@ -32,7 +32,7 @@ describe('Exception Management System Tests', () => {
             carrier_name: "FedEx",
             created_by: new mongoose.Types.ObjectId(),
             status: "Created",
-            user_email: adminEmail 
+            user_email: adminEmail
         });
         testShipmentId = (shipment._id as any).toString();
     });
@@ -94,11 +94,11 @@ describe('Exception Management System Tests', () => {
 
     it('TC12: Role-based access prevents Viewer from resolving exceptions', async () => {
         const adminEmail = 'admin@3pl.com';
-        
+
         // 1. Find the admin and temporarily change their role to Viewer
         const originalUser = await User.findOne({ email: adminEmail });
         const originalRole = originalUser?.role;
-        
+
         await User.updateOne({ email: adminEmail }, { $set: { role: 'Viewer' } });
 
         try {
