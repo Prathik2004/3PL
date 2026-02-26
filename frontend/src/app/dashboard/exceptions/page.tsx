@@ -6,6 +6,7 @@ import ExceptionCard from "@/src/components/ui/Dashboard/ExceptionCard";
 import { RefreshCwOff, FileText, CalendarX, ClipboardList, ListFilter, ChevronDown, X } from "lucide-react";
 import { apiClient } from "@/src/lib/api/client";
 import Pagination from "@/src/components/ui/Pagination";
+import { MobileFilterSheet } from "@/src/components/common/MobileFilterSheet";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -205,6 +206,7 @@ function ExceptionsFilterBar({
     exceptionTypes: [],
   });
   const [loading, setLoading] = useState(true);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   useEffect(() => {
     apiClient<FilterOptions>("/exceptions/filter-options")
@@ -226,51 +228,101 @@ function ExceptionsFilterBar({
   const hasActiveFilters =
     currentClient !== "all" || currentCarrier !== "all" || currentException !== "all";
 
-  return (
-    <div className="flex w-max items-center gap-4 rounded-xl bg-slate-50/80 px-4 py-2.5 shadow-sm border border-transparent">
-      {/* Filter icon + label */}
-      <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
-        <ListFilter size={16} className="text-slate-700" />
-        <span className="text-[15px] font-bold text-slate-900 tracking-wide">Filter</span>
-      </div>
-
-      {/* Dropdowns */}
-      <div className="flex items-center gap-5">
-        <InlineDropdown
-          label="Client"
-          value={currentClient}
-          options={clientOptions}
-          onChange={(v) => onUpdate("client", v)}
-          disabled={loading}
-          searchable
-        />
-        <InlineDropdown
-          label="Carrier"
-          value={currentCarrier}
-          options={carrierOptions}
-          onChange={(v) => onUpdate("carrier", v)}
-          disabled={loading}
-          searchable
-        />
-        <InlineDropdown
-          label="Exceptions"
-          value={currentException}
-          options={exceptionOptions}
-          onChange={(v) => onUpdate("exceptions", v)}
-          disabled={loading}
-        />
-      </div>
-
-      {/* Clear button — only shown when at least one filter is active */}
+  const renderDropdowns = (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full">
+      <InlineDropdown
+        label="Client"
+        value={currentClient}
+        options={clientOptions}
+        onChange={(v) => onUpdate("client", v)}
+        disabled={loading}
+        searchable
+      />
+      <InlineDropdown
+        label="Carrier"
+        value={currentCarrier}
+        options={carrierOptions}
+        onChange={(v) => onUpdate("carrier", v)}
+        disabled={loading}
+        searchable
+      />
+      <InlineDropdown
+        label="Exceptions"
+        value={currentException}
+        options={exceptionOptions}
+        onChange={(v) => onUpdate("exceptions", v)}
+        disabled={loading}
+      />
       {hasActiveFilters && (
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600 transition-colors ml-2 font-medium"
+          className="hidden sm:block mt-2 sm:mt-0 text-[14px] font-medium text-slate-400 hover:text-slate-600 transition-colors sm:ml-1"
         >
-          <X size={13} />
-          Clear
+          Clear All
         </button>
       )}
+    </div>
+  );
+
+  return (
+    <div className="w-full">
+      {/* Desktop Filter Row (Hidden on mobile) */}
+      <div className="hidden sm:flex w-max items-center gap-4 rounded-[14px] bg-slate-50/80 border border-slate-200 px-4 py-2.5 shadow-sm backdrop-blur-sm">
+        {/* Fixed "Filter" prefix icon */}
+        <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
+          <ListFilter size={16} className="text-slate-700" />
+          <span className="text-[15px] font-bold text-slate-900 tracking-wide">
+            Filter
+          </span>
+        </div>
+        {/* Render Desktop Filters */}
+        {renderDropdowns}
+      </div>
+
+      {/* Mobile Trigger Button (Hidden on desktop) */}
+      <div className="flex sm:hidden w-full">
+        <button
+          onClick={() => setIsMobileSheetOpen(true)}
+          className="flex w-full items-center justify-between rounded-xl bg-white border border-slate-200 px-5 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3 text-slate-700 font-semibold text-[15px]">
+            <ListFilter size={18} className="text-slate-700" />
+            Filters
+          </div>
+          {hasActiveFilters && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0F172A] text-[10px] font-bold text-white">
+              •
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Bottom Sheet (Portaled visually inside parent wrapper) */}
+      <MobileFilterSheet
+        isOpen={isMobileSheetOpen}
+        onClose={() => setIsMobileSheetOpen(false)}
+      >
+        {/* Drop the exact same visual dropdowns into the slide-up sheet */}
+        {renderDropdowns}
+        {/* Bottom Sheet Apply Button */}
+        <div className="w-full pt-4 mt-2 border-t border-slate-100 flex gap-3">
+          <button
+            onClick={() => {
+              onClear();
+              setIsMobileSheetOpen(false);
+            }}
+            className="flex-1 flex h-14 items-center justify-center rounded-xl bg-slate-100 text-[15px] font-bold text-slate-700 transition-colors hover:bg-slate-200"
+          >
+            Reset Filters
+          </button>
+          <button
+            onClick={() => setIsMobileSheetOpen(false)}
+            className="flex-1 flex h-14 items-center justify-center rounded-xl bg-[#0F172A] text-[15px] font-bold text-white transition-colors hover:bg-slate-800"
+          >
+            Apply Filters
+          </button>
+        </div>
+      </MobileFilterSheet>
     </div>
   );
 }
@@ -383,8 +435,8 @@ function ExceptionsContent() {
         <button
           onClick={() => setShowResolved((v) => !v)}
           className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors cursor-pointer ${showResolved
-              ? "bg-green-50 text-green-700 border-green-200"
-              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+            ? "bg-green-50 text-green-700 border-green-200"
+            : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
             }`}
         >
           {showResolved ? "Showing Resolved" : "Show Resolved"}
@@ -447,8 +499,8 @@ function ExceptionsContent() {
                     <td className="px-6 py-5">
                       <span
                         className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold border ${ex.resolved
-                            ? "bg-green-50 text-green-700 border-green-200"
-                            : "bg-red-50 text-red-700 border-red-200"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : "bg-red-50 text-red-700 border-red-200"
                           }`}
                       >
                         {ex.resolved ? "Resolved" : "Active"}
@@ -467,7 +519,7 @@ function ExceptionsContent() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between px-8 py-5 border-t border-[#E2E8F0]">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-8 py-5 gap-4 sm:gap-0 border-t border-[#E2E8F0]">
           <span className="text-[13px] text-[#64748B]">
             Showing{" "}
             <span className="font-bold text-[#0F172A]">

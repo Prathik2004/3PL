@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import KpiCard from "@/src/components/common/KPICard";
-import { FilterBar } from "@/src/components/common/FilterBar";
+import { ResponsiveFilterBar } from "@/src/components/common/ResponsiveFilterBar";
 import { CarrierVolumeCard } from "@/src/components/analytics/CarrierVolumeCard";
 import { MonthlyExceptionHeatmap } from "@/src/components/analytics/CalendarHeatmap";
 import { ChartAreaInteractive } from "@/src/components/analytics/AreaChart";
@@ -26,7 +26,7 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Live Metrics Row from real backend stats */}
-      <div className="flex flex-wrap gap-5">
+      <div className="flex flex-nowrap lg:flex-row gap-4 overflow-x-auto pb-4 lg:pb-0">
         <KpiCard
           title="Active Shipments"
           value={fmt(stats?.activeShipments)}
@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
       {/* Filter Bar */}
       <div className="flex items-center">
         <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded bg-slate-100" />}>
-          <FilterBar />
+          <ResponsiveFilterBar />
         </Suspense>
       </div>
 

@@ -131,7 +131,7 @@ const ShipmentTable = ({ onlyExceptions = false, filters = {} }: ShipmentTablePr
       </div>
 
       {/* TABLE FOOTER */}
-      <div className="flex items-center justify-between px-8 py-4 text-[#64748B] text-[12px] bg-white border-t border-[#E2E8F0] w-full">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-8 py-4 gap-4 sm:gap-0 text-[#64748B] text-[12px] bg-white border-t border-[#E2E8F0] w-full">
         <div className="flex items-center gap-1">
           <span>SHOWING</span>
           <span className="text-slate-900 font-semibold px-1">{startIdx}-{endIdx}</span>

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ListFilter } from "lucide-react";
 import ExportButton from "@/src/components/ui/ExportButton";
 import Pagination from "@/src/components/ui/Pagination";
 import Image from "next/image";
 import { apiClient } from "@/src/lib/api/client";
+import { MobileFilterSheet } from "@/src/components/common/MobileFilterSheet";
 
 // ---------- Types ----------
 interface LogEntry {
@@ -50,19 +51,21 @@ const FilterDropdown = ({ icon, label, value, options, onChange }: FilterDropdow
   }, []);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative w-full md:w-auto" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{ fontFamily: "Inter" }}
-        className="h-11 px-4 bg-white border border-[#E2E8F0] rounded-xl flex items-center gap-2 hover:bg-slate-50 transition-colors cursor-pointer outline-none"
+        className="h-11 w-full md:w-auto px-4 bg-white border border-[#E2E8F0] rounded-xl flex items-center justify-between md:justify-start gap-2 hover:bg-slate-50 transition-colors cursor-pointer outline-none overflow-hidden"
       >
-        <span className="text-[#94A3B8]">{icon}</span>
-        {label && <span className="text-[14px] font-medium text-[#64748B]">{label}:</span>}
-        <span className="text-[14px] font-bold text-[#0F172A]">{activeLabel}</span>
-        <ChevronDown className={`h-4 w-4 text-[#64748B] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[#94A3B8] flex-shrink-0">{icon}</span>
+          {label && <span className="text-[14px] font-medium text-[#64748B] hidden sm:inline-block whitespace-nowrap">{label}:</span>}
+          <span className="text-[14px] font-bold text-[#0F172A] truncate">{activeLabel}</span>
+        </div>
+        <ChevronDown className={`h-4 w-4 text-[#64748B] flex-shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] right-0 w-[200px] bg-white border border-[#E2E8F0] rounded-xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] z-50 py-2">
+        <div className="absolute top-[calc(100%+8px)] right-0 left-0 md:left-auto md:w-[200px] bg-white border border-[#E2E8F0] rounded-xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] z-50 py-2">
           {options.map((opt) => (
             <button
               key={opt.value}
@@ -89,6 +92,7 @@ export default function LogsPage() {
   const [eventType, setEventType] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -171,7 +175,7 @@ export default function LogsPage() {
 
       {/* Filter Bar */}
       <div className="w-full bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col md:flex-row items-center gap-4">
-        <div className="relative flex-1 group">
+        <div className="relative flex-1 w-full group">
           <img src="/icons/search.svg" alt="Search" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
           <input
             type="text"
@@ -181,7 +185,9 @@ export default function LogsPage() {
             className="w-full h-11 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-11 pr-4 text-[14.5px] text-[#0F172A] outline-none focus:ring-2 focus:ring-slate-100 focus:bg-white transition-all placeholder:text-[#94A3B8] font-medium"
           />
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Desktop Dropdowns */}
+        <div className="hidden md:flex items-center gap-3">
           <FilterDropdown
             icon={<img src="/icons/calendar.svg" alt="Calendar" className="h-4 w-4" />}
             value={dateFilter}
@@ -203,7 +209,69 @@ export default function LogsPage() {
             onChange={setStatusFilter}
           />
         </div>
+
+        {/* Mobile Filter Sheet Trigger */}
+        <div className="flex md:hidden w-full">
+          <button
+            onClick={() => setIsMobileSheetOpen(true)}
+            className="flex w-full items-center justify-between rounded-xl bg-white border border-[#E2E8F0] px-5 h-11 shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-3 text-slate-700 font-semibold text-[14.5px]">
+              <ListFilter size={16} className="text-slate-700" />
+              Filters
+            </div>
+            {(dateFilter !== "7" || eventType !== "all" || statusFilter !== "all") && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0F172A] text-[10px] font-bold text-white">
+                •
+              </span>
+            )}
+          </button>
+        </div>
       </div>
+
+      <MobileFilterSheet isOpen={isMobileSheetOpen} onClose={() => setIsMobileSheetOpen(false)}>
+        <div className="flex flex-col gap-4">
+          <FilterDropdown
+            icon={<img src="/icons/calendar.svg" alt="Calendar" className="h-4 w-4" />}
+            value={dateFilter}
+            options={dateOptions}
+            onChange={setDateFilter}
+          />
+          <FilterDropdown
+            icon={<img src="/icons/filter.svg" alt="Filter" className="h-4 w-4" />}
+            label="Event Type"
+            value={eventType}
+            options={eventTypeOptions}
+            onChange={setEventType}
+          />
+          <FilterDropdown
+            icon={<img src="/icons/filter.svg" alt="Status" className="h-4 w-4" />}
+            label="Status"
+            value={statusFilter}
+            options={statusOptions}
+            onChange={setStatusFilter}
+          />
+          <div className="w-full pt-4 mt-2 border-t border-slate-100 flex gap-3">
+            <button
+              onClick={() => {
+                setDateFilter("7");
+                setEventType("all");
+                setStatusFilter("all");
+                setIsMobileSheetOpen(false);
+              }}
+              className="flex-1 flex h-14 items-center justify-center rounded-xl bg-slate-100 text-[15px] font-bold text-slate-700 transition-colors hover:bg-slate-200"
+            >
+              Reset Filters
+            </button>
+            <button
+              onClick={() => setIsMobileSheetOpen(false)}
+              className="flex-1 flex h-14 items-center justify-center rounded-xl bg-[#0F172A] text-[15px] font-bold text-white transition-colors hover:bg-slate-800"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </MobileFilterSheet>
 
       {/* Logs Table */}
       <div className="w-full bg-white rounded-[24px] border border-[#E2E8F0] overflow-hidden flex flex-col shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
@@ -278,7 +346,7 @@ export default function LogsPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-10 py-6 border-t border-[#E2E8F0] bg-white">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-10 py-6 gap-4 sm:gap-0 border-t border-[#E2E8F0] bg-white">
           <span className="text-[14px] text-[#64748B] font-medium">
             Showing <span className="text-[#0F172A] font-bold">{startIdx} to {endIdx}</span> of{" "}
             <span className="text-[#0F172A] font-bold">{total}</span> logs

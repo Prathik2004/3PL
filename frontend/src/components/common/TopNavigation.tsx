@@ -4,13 +4,20 @@ import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import SearchBar from './searchBar';
 
-export default function TopNavigation() {
+interface TopNavigationProps {
+  onOpenMobileMenu?: () => void;
+}
+
+export default function TopNavigation({ onOpenMobileMenu }: TopNavigationProps) {
   return (
     <header className="relative w-full h-[80px] flex items-center justify-between px-4 lg:px-10 bg-white border-b border-slate-100">
 
       <div className="flex items-center flex-1 min-w-0 gap-4">
         {/* Mobile Menu Icon */}
-        <button className="lg:hidden p-2 -ml-2 hover:bg-slate-50 rounded-lg transition-colors">
+        <button
+          onClick={onOpenMobileMenu}
+          className="lg:hidden p-2 -ml-2 hover:bg-slate-50 rounded-lg transition-colors"
+        >
           <Menu className="h-6 w-6 text-[#64748B]" />
         </button>
 

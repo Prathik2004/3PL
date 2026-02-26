@@ -1,5 +1,4 @@
-import Sidebar from "@/src/components/common/Sidebar";
-import TopNavigation from "@/src/components/common/TopNavigation";
+import DashboardLayoutWrapper from "@/src/components/common/DashboardLayoutWrapper";
 
 export default function DashboardLayout({
   children,
@@ -7,14 +6,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-white overflow-x-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 min-w-0">
-        <TopNavigation />
-        <main className="flex-1 bg-[#F8FAF8] p-4 md:p-6 xl:p-10">
-          {children}
-        </main>
-      </div>
-    </div>
+    <DashboardLayoutWrapper>
+      {children}
+    </DashboardLayoutWrapper>
   );
 }

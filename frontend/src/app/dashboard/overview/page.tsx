@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import KpiCard from "@/src/components/common/KPICard";
 import ShipmentTable from "@/src/components/ui/Dashboard/ShipmentTable";
 import NewShipmentButton from "@/src/components/ui/NewShipmentButton";
-import { FilterBar } from "@/src/components/common/FilterBar";
+import { ResponsiveFilterBar } from "@/src/components/common/ResponsiveFilterBar";
 import ExportButton from "@/src/components/ui/ExportButton";
 import { shipmentService, DashboardStats } from "@/src/services/shipmentService";
 import type { ShipmentFilters } from "@/src/components/ui/Dashboard/ShipmentTable";
@@ -50,7 +50,7 @@ function DashboardContent() {
       <div className="space-y-6">
         {/* Filter and Action Buttons Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <FilterBar />
+          <ResponsiveFilterBar />
           <div className="flex items-center gap-3">
             <ExportButton />
             <NewShipmentButton />
