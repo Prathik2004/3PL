@@ -5,17 +5,17 @@ import { transporter } from "../config/mailer";
 import { IUser } from "../models/user";
 
 // 🔹 Define a type for populated shipments
-type ShipmentPopulated = Omit<IShipment, "created_by"> & { created_by?: IUser };
+type ShipmentPopulated = Omit<IShipment, "created_by"> & { creator_details?: IUser };
 
 const runExceptionTracker = (): void => {
   cron.schedule("0 */1 * * * *", async () => {
     try {
       console.log("Running Exception Tracker...");
 
-      // Populate 'created_by' so we can access email
+      // Populate creator_details via userId so we can access the user email
       const shipments = await Shipment.find({
         status: { $nin: ["Delivered", "Cancelled"] },
-      }).populate<{ created_by: IUser }>("created_by");
+      }).populate<{ creator_details: IUser }>("creator_details");
 
       const now = new Date();
 
@@ -80,10 +80,10 @@ const createException = async (
 
     console.log("Exception Created:", type);
 
-    if (shipment.created_by?.email) {
+    if (shipment.creator_details?.email) {
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: shipment.created_by.email,
+        to: shipment.creator_details.email,
         subject: `Walkwel 3PL - Exception Created: ${type}`,
         html: `
           <h3>An exception has been created</h3>
@@ -92,9 +92,9 @@ const createException = async (
           <p><b>Description:</b> ${message}</p>
         `,
       });
-      console.log(`Email sent to ${shipment.created_by.email}`);
+      console.log(`Email sent to ${shipment.creator_details.email}`);
     } else {
-      console.warn("Shipment1 has no user email. Cannot send notification.");
+      console.warn("Shipment has no user email. Cannot send notification.");
     }
   } else {
     console.log(`Already Exists → ${type} | Shipment: ${shipment.shipment_id}`);

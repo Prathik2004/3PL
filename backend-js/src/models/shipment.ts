@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 export enum ShipmentStatus {
@@ -26,7 +26,7 @@ export interface IShipment extends Document {
   pod_received: boolean;
   created_at: Date;
   updated_at: Date;
-  created_by: Types.ObjectId; 
+  created_by: string;
 }
 
 const ShipmentSchema: Schema = new Schema(
@@ -47,7 +47,7 @@ const ShipmentSchema: Schema = new Schema(
     carrier_name: { type: String, required: true },
     last_status_update: { type: Date, default: Date.now },
     pod_received: { type: Boolean, default: false },
-    created_by: { type:String, ref: "User", required: true },
+    created_by: { type: String, required: true },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

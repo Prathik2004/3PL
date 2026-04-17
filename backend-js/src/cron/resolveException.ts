@@ -5,7 +5,7 @@ import { IUser } from "../models/user";
 import { IShipment, Shipment } from "../models/shipment";
 import { ShipmentStatus } from "../models/shipment";
 
-type ShipmentPopulated = Omit<IShipment, "created_by"> & { created_by?: IUser };
+type ShipmentPopulated = Omit<IShipment, "created_by"> & { creator_details?: IUser };
 
 export const resolveExceptionService = async (
   exceptionId: string,
@@ -17,11 +17,11 @@ export const resolveExceptionService = async (
 
   const exception = await Exception.findById(exceptionId)
     .populate<{
-      shipment_id: IShipment & { created_by: IUser };
+      shipment_id: IShipment & { creator_details: IUser };
     }>({
       path: "shipment_id",
       populate: {
-        path: "created_by",
+        path: "creator_details",
         model: "User",
       },
     })
@@ -73,13 +73,13 @@ export const resolveExceptionService = async (
   }
   console.log(
     "Attempting to resolve exception for shipment:",
-    shipment?.created_by?.email,
+    shipment?.creator_details?.email,
   );
-  if (shipment?.created_by?.email) {
+  if (shipment?.creator_details?.email) {
     try {
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: shipment.created_by.email,
+        to: shipment.creator_details.email,
         subject: `Walkwel 3PL - Exception Resolved: ${exception.exception_type}`,
         html: `
           <h3>Your shipment exception has been resolved</h3>
@@ -92,7 +92,7 @@ export const resolveExceptionService = async (
           }
         `,
       });
-      console.log(`Resolution email sent to ${shipment.created_by.email}`);
+      console.log(`Resolution email sent to ${shipment.creator_details.email}`);
     } catch (err) {
       console.error("Failed to send resolution email:", err);
     }

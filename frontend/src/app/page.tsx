@@ -1,14 +1,26 @@
-import ResetPasswordCard from "../components/ResetPasswordCard";
-import EditShipmentModal from "../components/ui/EditShipmentModal";
-import NewShipmentModal from "../components/ui/NewShipmentModal";
-import InviteUserCard from "../components/userManagement/InviteUserCard";
 
+import LoginCard from "../components/ui/login/LoginCard";
+import Image from "next/image";
 
 export default function Home() {
 
   return (
-    <h1 className="text-2xl font-semibold text-[#0F172A] p-10 space-y-5 min-h-screen flex items-center ">
+     <div
+        style={{
+            fontFamily: "Inter"
+        }} 
+        className="min-h-screen bg-white flex flex-col items-center justify-center gap-5">
+            <div className="flex flex-col items-center justify-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center">
+                    <Image src="/icons/truck.svg" alt="3PL" width={20} height={20} />
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                    <span className="text-[30px]/[36px] text-black font-bold flex-wrap">Welcome back to 3PL Control Lite</span>
+                    <span className="text-[16px]/[24px] text-[#64748B] flex-wrap">Logistics Management Platform</span>
+                </div>
+            </div>
+            <LoginCard />
+        </div>
 
-    </h1>
   );
 }
