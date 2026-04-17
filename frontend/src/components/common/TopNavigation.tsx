@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import SearchBar from './searchBar';
+import UserDropdown from './UserDropdown';
 
 interface TopNavigationProps {
   onOpenMobileMenu?: () => void;
@@ -29,14 +30,7 @@ export default function TopNavigation({ onOpenMobileMenu }: TopNavigationProps) 
 
       {/* User Profile Section */}
       <div className="flex items-center gap-[16px] h-[40px] ml-4 shrink-0">
-        <div className="w-[40px] h-[40px] relative rounded-full overflow-hidden border border-slate-200">
-          <Image
-            src="https://api.dicebear.com/9.x/adventurer/svg?seed=Brooklynn"
-            alt="User Profile"
-            fill
-            unoptimized
-          />
-        </div>
+        <UserDropdown />
       </div>
     </header>
   );

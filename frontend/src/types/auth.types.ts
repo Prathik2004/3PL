@@ -8,6 +8,12 @@ export interface LoginPayload {
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  user?: {
+    name: string;
+    email: string;
+    role: string;
+    userId: string;
+  };
 }
 
 export interface UserSessionData {
